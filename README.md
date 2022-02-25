@@ -3,7 +3,9 @@ KeyValueResolver
 
 KeyValueResolver - An advanced key to value mapping tool with advanced hierarchical overwriting of values
 
-KeyValueResolver is roughly a hierarchical key-value-store. All keys accessed are cached in memory.
+This project is a fork from [Roperty](https://github.com/parship/roperty), originally developer by Parship.
+
+KeyValueResolver is a hierarchical key-value-store. All keys accessed are cached in memory.
 Depending on the persistence implementation, all keys are also preloaded into memory upon startup.
 The main task for KeyValueResolver is to serve values to a key according to a domain hierarchy.
 One typical example is serving different translations for translation keys.
