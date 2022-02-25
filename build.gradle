@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'com.nitrobox'
-description = 'Roperty'
+description = 'KeyValueResolver'
 java.sourceCompatibility = 11
 
 dependencies {
@@ -48,7 +48,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/nitrobox/roperty")
+            url = uri("https://maven.pkg.github.com/nitrobox/keyvalueresolver")
             credentials {
                 username = project.findProperty("github.user") ?: System.getenv("GITHUB_USER")
                 password = project.findProperty("github.token") ?: System.getenv("GITHUB_TOKEN")
