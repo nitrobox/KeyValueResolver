@@ -12,6 +12,7 @@ name: "Continuous Integration"
 jobs:
   build:
     runs-on: "ubuntu-latest"
+    concurrency: ${{ github.ref }}
     
     strategy:
       matrix:
@@ -21,7 +22,7 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v2"
-        
+
       - name: "Fetch tags"
         run: "git fetch --unshallow --tags"
 
