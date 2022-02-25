@@ -7,4 +7,5 @@ build
 .project
 *.iml
 *.prefs
+hs_err_pid*
 settings.xml

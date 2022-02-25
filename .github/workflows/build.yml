@@ -34,11 +34,6 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
           
-          #- name: "Configure Git user"
-          #  run: |
-          #      git config user.email "actions@github.com"
-          #      git config user.name "GitHub Actions"
-
       - name: "Build master with Gradle"
         if: github.ref == 'refs/heads/master'
         uses: gradle/gradle-build-action@v2
