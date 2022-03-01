@@ -3,7 +3,7 @@ on: push
 #    types: [ opened, synchronize, reopened ]
 #  push:
 #    branches:
-#      - "master"
+#      - "main"
 #    tags:
 #      - "**"
 
@@ -34,20 +34,20 @@ jobs:
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
           
-      - name: "Build master with Gradle"
-        if: github.ref == 'refs/heads/master'
+      - name: "Build main with Gradle"
+        if: github.ref == 'refs/heads/main'
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build -Preckon.stage=final
 
       - name: "Build with Gradle"
-        if: github.ref != 'refs/heads/master'
+        if: github.ref != 'refs/heads/main'
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
 
       - name: "Publish with Gradle"
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: gradle/gradle-build-action@v2
         with:
           arguments: reckonTagPush publish -Preckon.stage=final
