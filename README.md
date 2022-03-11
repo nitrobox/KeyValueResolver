@@ -107,9 +107,9 @@ To add a dependency on KeyValueResolver using Maven, use the following:
 
 ```xml
 <dependency>
-  <groupId>com.parship</groupId>
-  <artifactId>KeyValueResolver</artifactId>
-  <version>1.1.0</version>
+  <groupId>com.nitrobox</groupId>
+  <artifactId>keyvalueresolver</artifactId>
+  <version>0.9.0</version> <!-- use the latest version here -->
 </dependency>
 ```
 
@@ -117,7 +117,7 @@ To add a dependency using Gradle:
 
 ```
 dependencies {
-  compile 'com.parship:KeyValueResolver:1.1.0'
+  compile 'com.nitrobox:keyvalueresolver:0.9.0' // use the latest version here
 }
 ```
 
