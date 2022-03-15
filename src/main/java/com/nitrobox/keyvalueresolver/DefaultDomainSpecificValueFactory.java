@@ -24,8 +24,8 @@ package com.nitrobox.keyvalueresolver;
 public class DefaultDomainSpecificValueFactory implements DomainSpecificValueFactory {
 
     @Override
-    public DomainSpecificValue create(final Object value, final String changeSet, final String... domainKeyParts) {
-        return DomainSpecificValue.withChangeSet(value, changeSet, domainKeyParts);
+    public DomainSpecificValue create(final Object value, final String changeSet, final String... domainValues) {
+        return DomainSpecificValue.withChangeSet(value, changeSet, domainValues);
     }
 
     @Override

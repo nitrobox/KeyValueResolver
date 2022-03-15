@@ -210,7 +210,6 @@ public class KeyValuesTest {
         keyValues.put("value_2", "domain1", "*", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom1", "domain1"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-            new DefaultDomainSpecificValueFactory().create("value_1", null, "*", "*", "domain3"),
             new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "*", "domain3")
         );
     }
@@ -221,11 +220,11 @@ public class KeyValuesTest {
         keyValues.put("value_1", "domain1");
         keyValues.put("value_2", "domain1", "domain2");
         keyValues.put("value_3", "domain1", "*", "domain3");
+        keyValues.put("value_4", "domain1", "domain2", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom2", "domain2"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-            new DefaultDomainSpecificValueFactory().create("default", null),
             new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "domain2"),
-            new DefaultDomainSpecificValueFactory().create("value_3", null, "domain1", "*", "domain3")
+            new DefaultDomainSpecificValueFactory().create("value_4", null, "domain1", "domain2", "domain3")
         );
     }
 }

@@ -207,17 +207,17 @@ public class KeyValues {
         final Map<String, DomainSpecificValue> dvPatternMap = new HashMap<>();
         domainSpecificValues.stream()
             .filter(val -> val.patternMatches(matcher, resolver))
-            .forEach(dv -> dvPatternMap.compute(dv.getPattern(), (k, v) -> {
-                if (v == null) {
-                    return dv;
+            .forEach(newDomainValue -> dvPatternMap.compute(newDomainValue.getPattern(), (k, existingDomainValue) -> {
+                if (existingDomainValue == null) {
+                    return newDomainValue;
                 }
-                if (v.noChangeSet()) {
-                    return dv;
+                if (existingDomainValue.noChangeSet()) {
+                    return newDomainValue;
                 }
-                if (dv.noChangeSet()) {
-                    return v;
+                if (newDomainValue.noChangeSet()) {
+                    return existingDomainValue;
                 }
-                return v.compareChangeSet(dv) < 0 ? v : dv;
+                return existingDomainValue.compareChangeSet(newDomainValue) < 0 ? existingDomainValue : newDomainValue;
             }));
         return dvPatternMap.values();
     }
@@ -230,12 +230,10 @@ public class KeyValues {
                 domainValue = "[^|]*";
             } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
                 throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
-            } else {
-                domainValue = "(" + domainValue + "|\\*)";
             }
             builder.append(domainValue).append("\\|");
         }
-        while (builder.lastIndexOf("[^|]*\\|") == builder.length() - 7) {
+        while (builder.length() >= 7 && builder.lastIndexOf("[^|]*\\|") == builder.length() - 7) {
             builder.delete(builder.length() - 7, builder.length());
         }
         builder.append(".*");

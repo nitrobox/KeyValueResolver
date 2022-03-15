@@ -63,10 +63,8 @@ public class KeyValueResolverGetAllKeyValuesTest {
         assertThat(keyValues.getKey()).isEqualTo("key1");
         final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
         assertThat(domainSpecificValues).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_1", null),
                 new DefaultDomainSpecificValueFactory().create("value_dom1", null, "domval1"),
-                new DefaultDomainSpecificValueFactory().create("value_dom_2", null, "domval1", "domval2"),
-                new DefaultDomainSpecificValueFactory().create("value_dom_*", null, "*", "domval_other_2")
+                new DefaultDomainSpecificValueFactory().create("value_dom_2", null, "domval1", "domval2")
         );
     }
 
@@ -86,7 +84,6 @@ public class KeyValueResolverGetAllKeyValuesTest {
         assertThat(keyValues.getKey()).isEqualTo("key1");
         final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
         assertThat(domainSpecificValues).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_1", null),
                 new DefaultDomainSpecificValueFactory().create("value_dom1", null, "domval1")
         );
 
@@ -145,6 +142,22 @@ public class KeyValueResolverGetAllKeyValuesTest {
         assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
                 new DefaultDomainSpecificValueFactory().create("value_dom1", null, "domval1"),
                 new DefaultDomainSpecificValueFactory().create("value_dom2", null, "domval1", "domval2")
+        );
+    }
+    
+    @Test
+    void onlyTheBestMatchingKeyValuesAreReturned() {
+        keyValueResolver.set("key1", "value_dom2", "desc", "*", "domval2");
+        keyValueResolver.set("key1", "value_dom1&2", "desc", "domval1", "domval2");
+        keyValueResolver.set("key1", "value_dom1", "desc", "domval1", "*");
+
+        Collection<KeyValues> allKeyValues = keyValueResolver.getAllKeyValues(new MapBackedDomainResolver()
+                .set("dom1", "domval1")
+                .set("dom2", "domval2"));
+        assertThat(allKeyValues).hasSize(1);
+        final KeyValues keyValues = allKeyValues.iterator().next();
+        assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
+                new DefaultDomainSpecificValueFactory().create("value_dom1&2", null, "domval1", "domval2")
         );
     }
 }

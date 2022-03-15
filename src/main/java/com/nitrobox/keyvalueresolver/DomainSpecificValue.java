@@ -54,6 +54,11 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
         }
 
         final String[] domainValues = pattern.split("\\|");
+        int order = getOrder(domainValues);
+        return new DomainSpecificValue(value, changeSet, pattern, order);
+    }
+
+    private static int getOrder(String[] domainValues) {
         int order = 1;
         int i = 0;
         for (String domainValue : domainValues) {
@@ -62,7 +67,7 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
                 order = order | (int) Math.pow(2, i);
             }
         }
-        return new DomainSpecificValue(value, changeSet, pattern, order);
+        return order;
     }
 
     private DomainSpecificValue(Object value, String changeSet, String pattern, int ordering) {
@@ -74,18 +79,8 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
     }
 
     private DomainSpecificValue(Object value, String changeSet, String[] domainValues) {
-        StringBuilder builder = new StringBuilder(domainValues.length * 8);
-        int order = 1;
-        int i = 0;
-        for (String domainValue : domainValues) {
-            i++;
-            if (!"*".equals(domainValue)) {
-                order = order | (int) Math.pow(2, i);
-            }
-            builder.append(domainValue).append('|');
-        }
-        this.ordering = order;
-        this.pattern = builder.toString();
+        this.ordering = getOrder(domainValues);
+        this.pattern = domainValues.length == 0 ? "" : String.join("|", domainValues) + "|";
         this.value = value;
         this.changeSet = changeSet;
         this.matcher = createMatcher(pattern);
@@ -208,7 +203,7 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
      * This method is used for finding all DomainSpecificValues, that are either default or are in a specific (partial) domain.
      */
     public boolean patternMatches(Matcher matcher, DomainResolver resolver) {
-        return isInChangeSets(resolver.getActiveChangeSets()) && (isDefault() || matcher.matches(pattern));
+        return isInChangeSets(resolver.getActiveChangeSets()) && matcher.matches(pattern);
     }
 
     public boolean isDefault() {

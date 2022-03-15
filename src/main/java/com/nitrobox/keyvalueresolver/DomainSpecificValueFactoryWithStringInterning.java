@@ -8,8 +8,8 @@ package com.nitrobox.keyvalueresolver;
 public class DomainSpecificValueFactoryWithStringInterning implements DomainSpecificValueFactory {
 
     @Override
-    public DomainSpecificValue create(final Object value, final String changeSet, final String... domainKeyParts) {
-        return DomainSpecificValue.withChangeSet(internIfString(value), intern(changeSet), domainKeyParts);
+    public DomainSpecificValue create(final Object value, final String changeSet, final String... domainValues) {
+        return DomainSpecificValue.withChangeSet(internIfString(value), intern(changeSet), domainValues);
     }
 
     @Override
