@@ -69,8 +69,10 @@ public class KeyValues {
 
     public DomainSpecificValue putWithChangeSet(final String changeSet, final Object value, final String... domainValues) {
         Objects.requireNonNull(domainValues, "Domain key parts may no be null");
-        for (String domain : domainValues) {
-            Ensure.notEmpty(domain, "domain");
+        for (int i = 0; i < domainValues.length; i++) {
+            if (domainValues[i] == null || domainValues[i].trim().length() == 0) {
+                domainValues[i] = "*";
+            }
         }
         return addOrChangeDomainSpecificValue(changeSet, value, domainValues);
     }

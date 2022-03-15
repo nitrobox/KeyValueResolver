@@ -37,12 +37,12 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
     private final Matcher matcher;
     private final String changeSet;
 
-    public static DomainSpecificValue withChangeSet(Object value, String changeSet, String... domainKeys) {
-        return new DomainSpecificValue(value, changeSet, domainKeys);
+    public static DomainSpecificValue withChangeSet(Object value, String changeSet, String... domainValues) {
+        return new DomainSpecificValue(value, changeSet, domainValues);
     }
 
-    public static DomainSpecificValue withoutChangeSet(Object value, String... domainKeys) {
-        return new DomainSpecificValue(value, null, domainKeys);
+    public static DomainSpecificValue withoutChangeSet(Object value, String... domainValues) {
+        return new DomainSpecificValue(value, null, domainValues);
     }
 
     public static DomainSpecificValue withPattern(Object value, String changeSet, String pattern) {

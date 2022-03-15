@@ -17,6 +17,8 @@
 
 package com.nitrobox.keyvalueresolver;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,6 +41,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -389,12 +392,13 @@ public class KeyValueResolverImplTest {
         assertThat(keyValueResolver.dump().toString(), containsString("KeyValueResolver{domains=[domain1, domain2]\n"));
         assertThat(keyValueResolver.dump().toString(), containsString("KeyValues for \"otherKey\": KeyValues{\n"));
         assertThat(keyValueResolver.dump().toString(), containsString("\tdescription=\"\"\n"));
-        assertThat(keyValueResolver.dump().toString(), containsString("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\""));
+        assertThat(keyValueResolver.dump().toString(),
+                containsString("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\""));
 
         assertThat(keyValueResolver.dump().toString(), containsString("KeyValues for \"key\": KeyValues{\n"));
         assertThat(keyValueResolver.dump().toString(), containsString("\tdescription=\"\"\n"));
         assertThat(keyValueResolver.dump().toString(),
-            containsString("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\""));
+                containsString("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\""));
         assertThat(keyValueResolver.dump().toString(), containsString("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\""));
 
     }
@@ -407,7 +411,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.dump(new PrintStream(os));
         String output = os.toString("UTF8");
         assertThat(output,
-            is("KeyValueResolver{domains=[dom1]\nKeyValues for \"key\": KeyValues{\n\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}\n}\n}\n"));
+                is("KeyValueResolver{domains=[dom1]\nKeyValues for \"key\": KeyValues{\n\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}\n}\n}\n"));
     }
 
     @Test
@@ -513,5 +517,32 @@ public class KeyValueResolverImplTest {
         keyValueResolver.removeChangeSet("notExistingChangeSet");
 
         verifyNoInteractions(persistenceMock);
+    }
+
+    @Test
+    void getDomainValueMap() {
+        keyValueResolver.addDomains("dom1", "dom2", "dom3", "dom4");
+        final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
+                DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2", "domval3", "domval4"));
+        assertThat(domainValuesMap).hasSize(4);
+        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"), entry("dom4", "domval4"));
+    }
+
+    @Test
+    void getDomainValueMapExcessiveDomainValuesAreIgnored() {
+        keyValueResolver.addDomains("dom1", "dom2", "dom3");
+        final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
+                DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2", "domval3", "domval4"));
+        assertThat(domainValuesMap).hasSize(3);
+        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"));
+    }
+
+    @Test
+    void getDomainValueMapWithFewerDomainValuesGivesWildcards() {
+        keyValueResolver.addDomains("dom1", "dom2", "dom3", "dom4");
+        final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
+                DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2"));
+        assertThat(domainValuesMap).hasSize(4);
+        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "*"), entry("dom4", "*"));
     }
 }

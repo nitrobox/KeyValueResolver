@@ -33,8 +33,8 @@ public interface KeyValueResolver {
     <T> T get(String key, String... domainValues);
 
     /**
-     * Get a value for a given key from KeyValueResolver. When no value is found in KeyValueResolver, the provided default is stored in KeyValueResolver.
-     * Same as calling getOfDefine(key, defaultValue, resolver, null);
+     * Get a value for a given key from KeyValueResolver. When no value is found in KeyValueResolver, the provided default is stored in
+     * KeyValueResolver. Same as calling getOfDefine(key, defaultValue, resolver, null);
      *
      * @param key          key to query
      * @param defaultValue defaultValue is returned, when no value for the key is found
@@ -45,8 +45,8 @@ public interface KeyValueResolver {
     <T> T getOrDefine(String key, T defaultValue, DomainResolver resolver);
 
     /**
-     * Get a value for a given key from KeyValueResolver. When no value is found in KeyValueResolver, the provided default is stored
-     * in KeyValueResolver along with the provided description. Same as calling get(key, null, resolver);
+     * Get a value for a given key from KeyValueResolver. When no value is found in KeyValueResolver, the provided default is stored in
+     * KeyValueResolver along with the provided description. Same as calling get(key, null, resolver);
      *
      * @param <T>          type of the objects stored under the provided key
      * @param key          key to query
@@ -60,7 +60,7 @@ public interface KeyValueResolver {
 
     KeyValueResolver addDomains(String... domains);
 
-    void set(String key, Object value, String description, String... domains);
+    void set(String key, Object value, String description, String... domainValues);
 
     void setWithChangeSet(String key, Object value, String description, String changeSet, String... domainValues);
 
@@ -72,14 +72,16 @@ public interface KeyValueResolver {
 
     KeyValues getKeyValues(String key);
 
+    KeyValues getKeyValues(String key, DomainResolver resolver);
+
     /**
      * Get all KeyValues stored in this KeyValueResolver instance.
      */
     Collection<KeyValues> getAllKeyValues();
 
     /**
-     * Get those KeyValues stored in this KeyValueResolver instance, with only those DomainSpecificValues, where the provided resolver domains match
-     * or are wildcarded. The Default value of the KeyValues object is always returned, when present.
+     * Get those KeyValues stored in this KeyValueResolver instance, with only those DomainSpecificValues, where the provided resolver
+     * domains match or are wildcarded. The Default value of the KeyValues object is always returned, when present.
      */
     Collection<KeyValues> getAllKeyValues(DomainResolver resolver);
 
@@ -100,4 +102,6 @@ public interface KeyValueResolver {
     DomainResolver resolverFor(String... domainValues);
 
     List<String> getDomains();
+
+    Map<String, String> getDomainValuesMap(DomainSpecificValue domainSpecificValue);
 }

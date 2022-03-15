@@ -53,7 +53,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         this(persistence, createDomainSpecificValueFactory());
     }
 
-    public KeyValueResolverImpl(final Persistence persistence, DomainSpecificValueFactory domainSpecificValueFactory, final String... domains) {
+    public KeyValueResolverImpl(final Persistence persistence, DomainSpecificValueFactory domainSpecificValueFactory,
+            final String... domains) {
         initDomains(domains);
         initFromPersistence(persistence, domainSpecificValueFactory);
     }
@@ -167,20 +168,20 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public void set(final String key, final Object value, final String description, final String... domains) {
+    public void set(final String key, final Object value, final String description, final String... domainValues) {
         final String trimmedKey = trimKey(key);
-        LOGGER.debug("Storing value: '{}' for key: '{}' with given domains: '{}'.", value, trimmedKey, domains);
+        LOGGER.debug("Storing value: '{}' for key: '{}' with given domains: '{}'.", value, trimmedKey, domainValues);
         KeyValues keyValues = valuesStore.getOrCreateKeyValues(trimmedKey, description);
-        final DomainSpecificValue domainSpecificValue = keyValues.put(value, domains);
+        final DomainSpecificValue domainSpecificValue = keyValues.put(value, domainValues);
         store(trimmedKey, keyValues, domainSpecificValue);
     }
 
     @Override
     public void setWithChangeSet(final String key, final Object value, final String description, String changeSet,
-        final String... domainValues) {
+            final String... domainValues) {
         final String trimmedKey = trimKey(key);
         LOGGER.debug("Storing value: '{}' for key: '{}' for change set: '{}' with given domains: '{}'.", value, trimmedKey, changeSet,
-            domainValues);
+                domainValues);
         KeyValues keyValues = valuesStore.getOrCreateKeyValues(trimmedKey, description);
         final DomainSpecificValue domainSpecificValue = keyValues.putWithChangeSet(changeSet, value, domainValues);
         store(trimmedKey, keyValues, domainSpecificValue);
@@ -237,6 +238,11 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         return valuesStore.getValuesFor(key.trim());
     }
 
+    @Override
+    public KeyValues getKeyValues(String key, DomainResolver resolver) {
+        return getKeyValues(key).copy(domains, resolver);
+    }
+
     public void setDomainSpecificValueFactory(final DomainSpecificValueFactory domainSpecificValueFactory) {
         valuesStore.setDomainSpecificValueFactory(domainSpecificValueFactory);
     }
@@ -264,18 +270,18 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     @Override
     public <T> Map<String, T> getAllMappings(DomainResolver resolver) {
         return getAllKeyValues().stream()
-            .collect(Collector.of(HashMap::new,
-                (result, kv) -> {
-                    final T s = kv.get(domains, null, resolver);
-                    if (s != null) {
-                        result.put(kv.getKey(), s);
-                    }
-                }, (result1, result2) -> {
-                    result1.putAll(result2);
-                    return result1;
-                },
-                Collector.Characteristics.CONCURRENT,
-                Collector.Characteristics.UNORDERED));
+                .collect(Collector.of(HashMap::new,
+                        (result, kv) -> {
+                            final T s = kv.get(domains, null, resolver);
+                            if (s != null) {
+                                result.put(kv.getKey(), s);
+                            }
+                        }, (result1, result2) -> {
+                            result1.putAll(result2);
+                            return result1;
+                        },
+                        Collector.Characteristics.CONCURRENT,
+                        Collector.Characteristics.UNORDERED));
     }
 
     @Override
@@ -316,5 +322,19 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     @Override
     public List<String> getDomains() {
         return Collections.unmodifiableList(domains);
+    }
+
+    @Override
+    public Map<String, String> getDomainValuesMap(DomainSpecificValue domainSpecificValue) {
+        final String[] domainValues = domainSpecificValue.getPattern().split("\\|");
+        final Map<String, String> result = new HashMap<>();
+        int bothHaveValuesIndex = 0;
+        for (; bothHaveValuesIndex < min(domains.size(), domainValues.length); bothHaveValuesIndex++) {
+            result.put(domains.get(bothHaveValuesIndex), domainValues[bothHaveValuesIndex]);
+        }
+        for (int extraDomainsIndex = bothHaveValuesIndex; extraDomainsIndex < domains.size(); extraDomainsIndex++) {
+            result.put(domains.get(extraDomainsIndex), "*");
+        }
+        return result;
     }
 }
