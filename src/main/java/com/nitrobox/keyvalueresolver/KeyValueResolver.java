@@ -91,17 +91,58 @@ public interface KeyValueResolver {
 
     <T> Map<String, T> getAllMappings(String... domainValues);
 
+    /**
+     * Remove a single domain specific value with exactly the provided domainValues from the given changeSet.
+     * The key is also removed, when no domain specific values are left after this removal.
+     * @param key key for which to remove the domain specific value
+     * @param changeSet the changeSet to remove the domain specific value from
+     * @param domainValues the domainValues for the key to remove
+     */
     void removeWithChangeSet(String key, String changeSet, String... domainValues);
 
+    /**
+     * Remove a single domain specific value with exactly the provided domainValues.
+     * The key is also removed, when no domain specific values are left after this removal.
+     * @param key key for which to remove the domain specific value
+     * @param domainValues the domainValues for the key to remove
+     */
     void remove(String key, String... domainValues);
 
+    /**
+     * Removes all domain specific values that match the given domains.
+     * The key is also removed, when no domain specific values are left after this removal.
+     * @param key key for which to remove the domain specific values
+     * @param domainValues the domain patterns for which domain specific values shall be removed. May be partial and can contain wildcards.
+     */
+    void removeAllMatching(String key, String... domainValues);
+
+    /**
+     * removes a complete key with all domain specific values.
+     * @param key key to remove
+     */
     void removeKey(String key);
 
+    /**
+     * Removes a complete changeSet with all domain specific values stored in this changeset.
+     * @param changeSet changeSet to remove
+     */
     void removeChangeSet(String changeSet);
 
+    /**
+     * creates a resolver by combining the domainValues passed with the domains stored in this resolver.
+     * When less domainValues are passed, than domains are present, the resulting domains are wildcarded. 
+     * @param domainValues domain values to set in the order of the domains stored in this resolver.
+     * @return a DomainResolver with the provided values set.
+     */
     DomainResolver resolverFor(String... domainValues);
 
     List<String> getDomains();
 
+    /**
+     * Creates a map with domain -> domainValue mappings for the provided domainSpecificValue.
+     * When the domainSpecificValue does not have domainValues for all domains, the remaining domains are filled with wildcard '*'.
+     * @param domainSpecificValue domainSpecificValue to map
+     * @return a map containing a mapping domain -> domainValue for all domains of this resolver
+     */
     Map<String, String> getDomainValuesMap(DomainSpecificValue domainSpecificValue);
 }

@@ -290,6 +290,9 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         KeyValues keyValues = valuesStore.getKeyValuesFromMapOrPersistence(trimmedKey);
         if (keyValues != null) {
             remove(trimmedKey, keyValues.remove(changeSet, domainValues));
+            if (keyValues.getDomainSpecificValues().isEmpty()) {
+                removeKey(trimmedKey);
+            }
         }
     }
 
@@ -299,10 +302,24 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
+    public void removeAllMatching(final String key, final String... domainValues) {
+        final String trimmedKey = trimKey(key);
+        final KeyValues keyValues = valuesStore.getKeyValuesFromMapOrPersistence(trimmedKey);
+        if (keyValues != null) {
+            keyValues.removeAll(domains, resolverFor(domainValues));
+            if (keyValues.getDomainSpecificValues().isEmpty()) {
+                removeKey(trimmedKey);
+            }
+        }
+    }
+
+    @Override
     public void removeKey(final String key) {
         final String trimmedKey = trimKey(key);
         valuesStore.remove(trimmedKey);
-        persistence.remove(trimmedKey);
+        if (persistence != null) {
+            persistence.remove(trimmedKey);
+        }
     }
 
     @Override

@@ -197,6 +197,11 @@ public class KeyValues {
 
     public KeyValues copy(List<String> domains, DomainResolver resolver) {
         KeyValues result = new KeyValues(key, domainSpecificValueFactory, description);
+        result.domainSpecificValues.addAll(findMatchingValues(domains, resolver));
+        return result;
+    }
+
+    private Collection<DomainSpecificValue> findMatchingValues(List<String> domains, DomainResolver resolver) {
         Matcher matcher = buildMatcher(domains, resolver);
 
         final Map<String, DomainSpecificValue> dvPatternMap = new HashMap<>();
@@ -214,15 +219,14 @@ public class KeyValues {
                 }
                 return v.compareChangeSet(dv) < 0 ? v : dv;
             }));
-        result.domainSpecificValues.addAll(dvPatternMap.values());
-        return result;
+        return dvPatternMap.values();
     }
 
     private static RegexMatcher buildMatcher(final Iterable<String> domains, final DomainResolver resolver) {
         StringBuilder builder = new StringBuilder();
         for (String domain : domains) {
             String domainValue = resolver.getDomainValue(domain);
-            if (domainValue == null) {
+            if (domainValue == null || domainValue.equals("*")) {
                 domainValue = "[^|]*";
             } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
                 throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
@@ -236,5 +240,9 @@ public class KeyValues {
         }
         builder.append(".*");
         return new RegexMatcher(builder.toString());
+    }
+
+    public void removeAll(List<String> domains, DomainResolver resolver) {
+        this.domainSpecificValues.removeAll(findMatchingValues(domains, resolver));
     }
 }

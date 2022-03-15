@@ -454,6 +454,16 @@ public class KeyValueResolverImplTest {
         assertThat(kvrWithPersistence.get("key", mock(DomainResolver.class)), is("value"));
         assertThat(kvrWithPersistence.get("key", resolverMock), is("domValue2"));
     }
+    
+    @Test
+    void removeLastDomainSpecificValueRemovesKeyCompletely() {
+        keyValueResolver.addDomains("domain1", "domain2", "domain3");
+        keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
+        keyValueResolver.set("key", "value3", "descr", "dom1", "dom2", "dom3");
+        keyValueResolver.remove("key", "dom1", "dom2");
+        keyValueResolver.remove("key", "dom1", "dom2", "dom3");
+        assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
+    }
 
     @Test
     void removeDoesNotCallPersistenceWhenNoDomainSpecificValueExists() {
@@ -462,6 +472,32 @@ public class KeyValueResolverImplTest {
         verify(persistenceMock, never()).remove(any(), any());
     }
 
+    @Test
+    void removeAllMatching() {
+        keyValueResolver.addDomains("domain1", "domain2", "domain3", "domain4");
+        keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
+        keyValueResolver.set("key", "value3", "descr", "dom1", "dom2", "dom3");
+        keyValueResolver.set("key", "value2Other", "descr", "dom1", "dom2Other", "dom3");
+        keyValueResolver.set("key", "value3Other", "descr", "dom1", "dom2", "dom3Other");
+        keyValueResolver.set("key", "value4", "descr", "dom1", "other", "dom3", "whatever");
+        keyValueResolver.removeAllMatching("key","dom1", "*", "dom3");
+        final KeyValues keyValues = keyValueResolver.getKeyValues("key");
+        assertThat(keyValues.getDomainSpecificValues()).hasSize(2);
+        assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
+                new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
+                new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other")
+        );
+    }
+
+    @Test
+    void removeAllMatchingLastValueRemovesKeyCompletely() {
+        keyValueResolver.addDomains("domain1", "domain2");
+        keyValueResolver.set("key", "value2", "descr", "dom1");
+        keyValueResolver.set("key", "value3", "descr", "dom1", "dom2");
+        keyValueResolver.removeAllMatching("key","dom1", "*");
+        assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
+    }
+    
     @Test
     void removeACompleteKey() {
         KeyValueResolverImpl kvrWithPersistence = new KeyValueResolverImpl(persistenceMock);
