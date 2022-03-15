@@ -17,11 +17,7 @@
 
 package com.nitrobox.keyvalueresolver;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,20 +31,20 @@ public class MapBackedDomainResolverTest {
 
     @Test
     void setAndGetDomainValues() {
-        assertThat(resolver.getDomainValue("dom1"), is("val1"));
+        assertThat(resolver.getDomainValue("dom1")).isEqualTo("val1");
     }
 
     @Test
     void setAndGetActiveChangeSets() {
         resolver.addActiveChangeSets("CS1", "CS2");
-        assertThat(resolver.getActiveChangeSets(), containsInAnyOrder("CS1", "CS2"));
+        assertThat(resolver.getActiveChangeSets()).containsExactlyInAnyOrder("CS1", "CS2");
         resolver.addActiveChangeSets("CS3");
-        assertThat(resolver.getActiveChangeSets(), containsInAnyOrder("CS1", "CS2", "CS3"));
+        assertThat(resolver.getActiveChangeSets()).containsExactlyInAnyOrder("CS1", "CS2", "CS3");
     }
 
     @Test
     void toStringTest() {
-        assertThat(resolver.toString(), is("com.nitrobox.keyvalueresolver.MapBackedDomainResolver with {dom1=val1, dom2=val2}"));
+        assertThat(resolver.toString()).isEqualTo("com.nitrobox.keyvalueresolver.MapBackedDomainResolver with {dom1=val1, dom2=val2}");
     }
 
     @Test
@@ -59,26 +55,26 @@ public class MapBackedDomainResolverTest {
         MapBackedDomainResolver anotherResolver = new MapBackedDomainResolver();
         anotherResolver.set("domain", "value");
 
-        assertThat(aResolver, equalTo(anotherResolver));
-        assertThat(aResolver.hashCode(), is(anotherResolver.hashCode()));
+        assertThat(aResolver).isEqualTo(anotherResolver);
+        assertThat(aResolver.hashCode()).isEqualTo(anotherResolver.hashCode());
     }
 
     @Test
     void resolverShouldBeEqualToItself() {
         MapBackedDomainResolver aResolver = new MapBackedDomainResolver();
-        assertThat(aResolver, equalTo(aResolver));
+        assertThat(aResolver).isEqualTo(aResolver);
     }
 
     @Test
     void resolverShouldNotBeEqualToNull() {
         MapBackedDomainResolver aResolver = new MapBackedDomainResolver();
-        assertThat(aResolver, not(equalTo(null)));
+        assertThat(aResolver).isNotNull();
     }
 
     @Test
     void domainResolverOfDifferentClassShouldNotBeEqual() {
         MapBackedDomainResolver aResolver = new MapBackedDomainResolver();
-        assertThat(aResolver, not(equalTo(new Object())));
+        assertThat(aResolver).isNotEqualTo(new Object());
     }
 
     @Test
@@ -89,6 +85,6 @@ public class MapBackedDomainResolverTest {
         MapBackedDomainResolver anotherResolver = new MapBackedDomainResolver();
         anotherResolver.set("anotherDomain", "anotherValue");
 
-        assertThat(aResolver, not(equalTo(anotherResolver)));
+        assertThat(aResolver).isNotEqualTo(anotherResolver);
     }
 }

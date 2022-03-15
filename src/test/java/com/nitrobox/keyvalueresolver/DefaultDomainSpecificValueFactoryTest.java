@@ -1,8 +1,7 @@
 package com.nitrobox.keyvalueresolver;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +16,8 @@ public class DefaultDomainSpecificValueFactoryTest {
     void factoryCreatesCorrectDSVForBaseKey() {
         String value = "value";
         DomainSpecificValue dsv = factory.create(value, null);
-        assertThat((String) dsv.getValue(), is(value));
-        assertThat(dsv.getPattern(), is(""));
+        assertThat((String) dsv.getValue()).isEqualTo(value);
+        assertThat(dsv.getPattern()).isEqualTo("");
     }
 
     @Test
@@ -27,8 +26,8 @@ public class DefaultDomainSpecificValueFactoryTest {
 
         DomainSpecificValue dsv = factory.create(value, null, "DE", "de_DE");
 
-        assertThat((String) dsv.getValue(), is(value));
-        assertThat(dsv.getPattern(), is("DE|de_DE|"));
+        assertThat((String) dsv.getValue()).isEqualTo(value);
+        assertThat(dsv.getPattern()).isEqualTo("DE|de_DE|");
     }
 
     @Test
@@ -38,6 +37,18 @@ public class DefaultDomainSpecificValueFactoryTest {
         DomainSpecificValue dsv = factory.create(value, null, "DE");
         DomainSpecificValue moreSpecificDsv = factory.create(value, null, "DE", "de_DE");
 
-        assertThat(dsv.compareTo(moreSpecificDsv), greaterThan(0));
+        assertThat(dsv.compareTo(moreSpecificDsv)).isGreaterThan(0);
+    }
+    
+    @Test
+    void valueCreatedFromPatternIsTheSameAsFromDomainValues() {
+        final DomainSpecificValue value = factory.createFromPattern("value", null, "DE|de|*|XXX|");
+        final DomainSpecificValue valueCompare = factory.create("value", null, "DE", "de", "*", "XXX");
+        assertThat(value).isEqualTo(valueCompare);
+    }
+    
+    @Test
+    void patternMustEndWithPipe() {
+        assertThrows(IllegalArgumentException.class, () -> factory.createFromPattern("value", null, "asdf"));
     }
 }

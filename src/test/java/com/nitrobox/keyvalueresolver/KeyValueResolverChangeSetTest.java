@@ -17,8 +17,7 @@
 
 package com.nitrobox.keyvalueresolver;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -42,11 +41,11 @@ public class KeyValueResolverChangeSetTest {
         keyValueResolver.setWithChangeSet("key", "valueForChangeSet", "descr", "changeSet");
 
         DomainResolver resolverWithoutChangeSet = mock(DomainResolver.class);
-        assertThat(keyValueResolver.get("key", resolverWithoutChangeSet), is("value"));
+        assertThat((String) keyValueResolver.get("key", resolverWithoutChangeSet)).isEqualTo("value");
 
         DomainResolver resolver = mock(DomainResolver.class);
         when(resolver.getActiveChangeSets()).thenReturn(Collections.singletonList("changeSet"));
-        assertThat(keyValueResolver.get("key", resolver), is("valueForChangeSet"));
+        assertThat((String) keyValueResolver.get("key", resolver)).isEqualTo("valueForChangeSet");
     }
 
     @Test

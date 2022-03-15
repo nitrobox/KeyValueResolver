@@ -1,9 +1,6 @@
 package com.nitrobox.keyvalueresolver;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,14 +37,14 @@ public class ValuesStoreTest {
 
     @Test
     void valuesAreEmptyOnInitialization() {
-        assertThat(valuesStore.getAllValues().size(), is(0));
-        assertThat(valuesStore.getValuesFor("key"), nullValue());
+        assertThat(valuesStore.getAllValues()).isEmpty();
+        assertThat(valuesStore.getValuesFor("key")).isNull();
     }
 
     @Test
     void cannotModifyMapFromOuterClass() {
         assertThrows(UnsupportedOperationException.class, () -> valuesStore.getAllValues().add(mock(KeyValues.class)));
-        assertThat(valuesStore.getAllValues().size(), is(0));
+        assertThat(valuesStore.getAllValues()).isEmpty();
     }
 
     @Test
@@ -57,10 +54,10 @@ public class ValuesStoreTest {
 
         valuesStore.setAllValues(values);
 
-        assertThat(valuesStore.getValuesFor("key"), is(keyValues));
-        assertThat(valuesStore.getValuesFor("another key"), nullValue());
-        assertThat(valuesStore.dump(), is("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"\"\n}"));
-        assertThat(valuesStore.getAllValues().size(), is(1));
+        assertThat(valuesStore.getValuesFor("key")).isEqualTo(keyValues);
+        assertThat(valuesStore.getValuesFor("another key")).isNull();
+        assertThat(valuesStore.dump()).isEqualTo("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"\"\n}");
+        assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
     @Test
@@ -70,8 +67,8 @@ public class ValuesStoreTest {
         KeyValues result = valuesStore.getKeyValuesFromMapOrPersistence("key");
 
         verify(persistence).load("key", domainSpecificValueFactory);
-        assertThat(result, is(keyValues));
-        assertThat(valuesStore.getAllValues().size(), is(1));
+        assertThat(result).isEqualTo(keyValues);
+        assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
     @Test
@@ -82,17 +79,17 @@ public class ValuesStoreTest {
 
         KeyValues result = valuesStore.getKeyValuesFromMapOrPersistence("key");
 
-        assertThat(result, is(keyValues));
-        assertThat(valuesStore.getAllValues().size(), is(1));
+        assertThat(result).isEqualTo(keyValues);
+        assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
     @Test
     void valueShouldBeAdded() {
         KeyValues result = valuesStore.getOrCreateKeyValues("key", "description");
 
-        assertThat(result.getDescription(), is("description"));
+        assertThat(result.getDescription()).isEqualTo("description");
 
-        assertThat(valuesStore.getValuesFor("key"), is(result));
+        assertThat(valuesStore.getValuesFor("key")).isEqualTo(result);
     }
 
     @Test
@@ -104,9 +101,9 @@ public class ValuesStoreTest {
 
         valuesStore.dump(out);
 
-        assertThat(new String(byteArrayOutputStream.toByteArray()),
-            is("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"description\"\n}"));
-        assertThat(valuesStore.getAllValues().size(), is(1));
+        assertThat(new String(byteArrayOutputStream.toByteArray()))
+                .isEqualTo("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"description\"\n}");
+        assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
     @Test
@@ -115,9 +112,9 @@ public class ValuesStoreTest {
 
         KeyValues result = valuesStore.remove("key");
 
-        assertThat(valuesStore.getValuesFor("key"), not(is(result)));
-        assertThat(valuesStore.getValuesFor("key"), not(is(keyValues)));
-        assertThat(valuesStore.getAllValues().size(), is(0));
+        assertThat(valuesStore.getValuesFor("key")).isNotEqualTo(result);
+        assertThat(valuesStore.getValuesFor("key")).isNotEqualTo(keyValues);
+        assertThat(valuesStore.getAllValues()).isEmpty();
     }
 
     @Test
@@ -129,9 +126,9 @@ public class ValuesStoreTest {
         valuesStore.getOrCreateKeyValues("another key", null);
         valuesStore.reload();
 
-        assertThat(valuesStore.getValuesFor("key"), is(keyValues));
-        assertThat(valuesStore.getValuesFor("another key"), nullValue());
-        assertThat(valuesStore.getAllValues().size(), is(1));
+        assertThat(valuesStore.getValuesFor("key")).isEqualTo(keyValues);
+        assertThat(valuesStore.getValuesFor("another key")).isNull();
+        assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
 

@@ -20,11 +20,7 @@ package com.nitrobox.keyvalueresolver;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -60,53 +55,53 @@ public class KeyValuesTest {
     @Test
     void descriptionIsNeverNullButIsTheEmptyString() {
         KeyValues keyValues = new KeyValues("key", new DefaultDomainSpecificValueFactory(), null);
-        assertThat(keyValues.getDescription(), is(""));
+        assertThat(keyValues.getDescription()).isEqualTo("");
     }
 
     @Test
     void toStringEmpty() {
-        assertThat(keyValues.toString(), CoreMatchers.is("KeyValues{\n\tdescription=\"\"\n" +
-            "}"));
+        assertThat(keyValues.toString()).isEqualTo("KeyValues{\n\tdescription=\"\"\n" +
+            "}");
     }
 
     @Test
     void toStringFilled() {
         keyValues.setDescription("description");
         keyValues.put("text", "domain1", "domain2");
-        assertThat(keyValues.toString(), CoreMatchers.is("KeyValues{\n" +
+        assertThat(keyValues.toString()).isEqualTo("KeyValues{\n" +
             "\tdescription=\"description\"\n" +
             "\tDomainSpecificValue{pattern=\"domain1|domain2|\", ordering=7, value=\"text\"}\n" +
-            "}"));
+            "}");
     }
 
     @Test
     void gettingFromAnEmptyKeyValuesGivesNull() {
-        assertThat(keyValues.get(singletonList("dom1"), null, resolver), nullValue());
+        assertThat((String) keyValues.get(singletonList("dom1"), null, resolver)).isNull();
     }
 
     @Test
     void whenNoPatternMatchesTheDefaultValueIsReturned() {
         keyValues.put("value", "domain");
-        assertThat(keyValues.get(singletonList("x1"), "default", resolver), is("default"));
+        assertThat(keyValues.get(singletonList("x1"), "default", resolver)).isEqualTo("default");
     }
 
     @Test
     void whenNoPatternMatchesButADefaultIsStoredItIsReturnedAndNotTheProvidedDefault() {
         keyValues.put("text");
-        assertThat(keyValues.get(singletonList("x1"), "default", resolver), is("text"));
+        assertThat(keyValues.get(singletonList("x1"), "default", resolver)).isEqualTo("text");
     }
 
     @Test
     void whenAPatternMatchesItIsReturnedAndNotTheDefault() {
         keyValues.put("def");
         keyValues.put("text", "domain");
-        assertThat(keyValues.get(singletonList("domain"), "default", resolver), is("text"));
+        assertThat(keyValues.get(singletonList("domain"), "default", resolver)).isEqualTo("text");
     }
 
     @Test
     void whenNoValuesAreDefinedGettingAllDomainSpecificValuesGivesAnEmptySet() {
         Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
-        assertThat(domainSpecificValues, hasSize(0));
+        assertThat(domainSpecificValues).isEmpty();
     }
 
     @Test
@@ -115,17 +110,17 @@ public class KeyValuesTest {
         keyValues.put("value2", "dom1", "dom2");
         keyValues.put("value*", "*", "dom2");
         Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
-        assertThat(domainSpecificValues, hasSize(3));
+        assertThat(domainSpecificValues).hasSize(3);
         Iterator<DomainSpecificValue> iterator = domainSpecificValues.iterator();
         DomainSpecificValue value = iterator.next();
-        assertThat((String) value.getValue(), is("value2"));
-        assertThat(value.getPattern(), is("dom1|dom2|"));
+        assertThat((String) value.getValue()).isEqualTo("value2");
+        assertThat(value.getPattern()).isEqualTo("dom1|dom2|");
         value = iterator.next();
-        assertThat((String) value.getValue(), is("value*"));
-        assertThat(value.getPattern(), is("*|dom2|"));
+        assertThat((String) value.getValue()).isEqualTo("value*");
+        assertThat(value.getPattern()).isEqualTo("*|dom2|");
         value = iterator.next();
-        assertThat((String) value.getValue(), is("value1"));
-        assertThat(value.getPattern(), is("dom1|"));
+        assertThat((String) value.getValue()).isEqualTo("value1");
+        assertThat(value.getPattern()).isEqualTo("dom1|");
     }
 
     @Test
@@ -133,14 +128,14 @@ public class KeyValuesTest {
         DomainResolver resolverMock = mock(DomainResolver.class);
         when(resolverMock.getDomainValue("dom3")).thenReturn("domVal3");
         keyValues.put("value", "*", "*", "domVal3");
-        assertThat(keyValues.get(asList("dom1", "dom2", "dom3"), "default", resolverMock), is("value"));
+        assertThat(keyValues.get(asList("dom1", "dom2", "dom3"), "default", resolverMock)).isEqualTo("value");
     }
 
     @Test
     void callingGetWithAnEmptyDomainListDoesNotUseTheResolver() {
-        assertThat(keyValues.<String>get(emptyList(), null, null), nullValue());
+        assertThat(keyValues.<String>get(emptyList(), null, null)).isNull();
         keyValues.put("val");
-        assertThat(keyValues.get(emptyList(), null, null), is("val"));
+        assertThat((String) keyValues.get(emptyList(), null, null)).isEqualTo("val");
     }
 
     @Test
@@ -152,14 +147,14 @@ public class KeyValuesTest {
     void getAWildcardOverriddenValueIsReturnedByBestMatch() {
         keyValues.put("value_1", "*", "*", "domain3");
         keyValues.put("value_2", "domain1", "*", "domain3");
-        assertThat(keyValues.get(asList("domain1", "domain2", "domain3"), null, resolver), is("value_2"));
+        assertThat((String) keyValues.get(asList("domain1", "domain2", "domain3"), null, resolver)).isEqualTo("value_2");
     }
 
     @Test
     void getAWildcardOverriddenValueIsReturnedWhenAllDomainsMatch() {
         keyValues.put("other value", "aaa", "*", "domain3");
         keyValues.put("value", "domain1", "*", "domain3");
-        assertThat(keyValues.get(asList("domain1", "domain2", "domain3"), null, resolver), is("value"));
+        assertThat((String) keyValues.get(asList("domain1", "domain2", "domain3"), null, resolver)).isEqualTo("value");
     }
 
     @Test
@@ -180,15 +175,15 @@ public class KeyValuesTest {
         keyValues.put("overridden2", "domain1", "domain2");
         keyValues.put("overridden3", "domain1", "domain2", "domain3");
         String value = keyValues.get(asList("domain1", "domain2", "domain3"), null, resolver);
-        assertThat(value, is("overridden1"));
+        assertThat(value).isEqualTo("overridden1");
     }
 
     @Test
     void getDefaultValue() {
-        assertThat(keyValues.getDefaultValue(), nullValue());
+        assertThat((String) keyValues.getDefaultValue()).isNull();
         keyValues.put("default");
         keyValues.put("other", "domain");
-        assertThat(keyValues.getDefaultValue(), is("default"));
+        assertThat((String) keyValues.getDefaultValue()).isEqualTo("default");
     }
 
     @Test
@@ -205,8 +200,8 @@ public class KeyValuesTest {
     void domainsWithTheSamePrefixReturnTheCorrectValue() {
         keyValues.put("valuePrefix", "dom1", "prefix");
         keyValues.put("value1", "dom1", "prefixDom2");
-        assertThat(keyValues.get(asList("dom1", "prefix"), null, resolver), is("valuePrefix"));
-        assertThat(keyValues.get(asList("dom1", "prefixDom2"), null, resolver), is("value1"));
+        assertThat((String) keyValues.get(asList("dom1", "prefix"), null, resolver)).isEqualTo("valuePrefix");
+        assertThat((String) keyValues.get(asList("dom1", "prefixDom2"), null, resolver)).isEqualTo("value1");
     }
 
     @Test
@@ -214,10 +209,10 @@ public class KeyValuesTest {
         keyValues.put("value_1", "*", "*", "domain3");
         keyValues.put("value_2", "domain1", "*", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom1", "domain1"));
-        assertThat(copy.getDomainSpecificValues(), containsInAnyOrder(
+        assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
             new DefaultDomainSpecificValueFactory().create("value_1", null, "*", "*", "domain3"),
             new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "*", "domain3")
-        ));
+        );
     }
 
     @Test
@@ -227,10 +222,10 @@ public class KeyValuesTest {
         keyValues.put("value_2", "domain1", "domain2");
         keyValues.put("value_3", "domain1", "*", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom2", "domain2"));
-        assertThat(copy.getDomainSpecificValues(), containsInAnyOrder(
+        assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
             new DefaultDomainSpecificValueFactory().create("default", null),
             new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "domain2"),
             new DefaultDomainSpecificValueFactory().create("value_3", null, "domain1", "*", "domain3")
-        ));
+        );
     }
 }

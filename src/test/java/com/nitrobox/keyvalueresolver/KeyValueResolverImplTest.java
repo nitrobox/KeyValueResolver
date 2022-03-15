@@ -19,12 +19,6 @@ package com.nitrobox.keyvalueresolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
@@ -104,7 +98,7 @@ public class KeyValueResolverImplTest {
     @Test
     void gettingAPropertyThatDoesNotExistGivesNull() {
         String value = keyValueResolver.get("key", resolverMock);
-        assertThat(value, nullValue());
+        assertThat(value).isNull();
     }
 
     @Test
@@ -118,27 +112,27 @@ public class KeyValueResolverImplTest {
     void gettingAPropertyThatDoesNotExistGivesDefaultValue() {
         String text = "default";
         String value = keyValueResolver.getOrDefault("key", text, resolverMock);
-        assertThat(value, is(text));
+        assertThat(value).isEqualTo(text);
     }
 
     @Test
     void settingNullAsValue() {
         keyValueResolver.set("key", "value", null);
-        assertThat(keyValueResolver.get("key", resolverMock), is("value"));
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isEqualTo("value");
         keyValueResolver.set("key", null, null);
-        assertThat(keyValueResolver.get("key", resolverMock), nullValue());
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isNull();
     }
 
     @Test
     void settingAnEmptyString() {
         keyValueResolver.set("key", "", null);
-        assertThat(keyValueResolver.get("key", resolverMock), is(""));
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isEqualTo("");
     }
 
     @Test
     void keysAreAlwaysTrimmed() {
         keyValueResolver.set("  key   ", "val", "descr");
-        assertThat(keyValueResolver.get(" key", resolverMock), is("val"));
+        assertThat((String) keyValueResolver.get(" key", resolverMock)).isEqualTo("val");
     }
 
     @Test
@@ -147,7 +141,7 @@ public class KeyValueResolverImplTest {
         String text = "some Value";
         keyValueResolver.set(key, text, null);
         String value = keyValueResolver.getOrDefault(key, "default", resolverMock);
-        assertThat(value, is(text));
+        assertThat(value).isEqualTo(text);
     }
 
     @Test
@@ -165,7 +159,7 @@ public class KeyValueResolverImplTest {
         String text = "value";
         keyValueResolver.set("key", text, null);
         String value = keyValueResolver.get("key", resolverMock);
-        assertThat(value, is(text));
+        assertThat(value).isEqualTo(text);
     }
 
     @Test
@@ -173,20 +167,20 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "first", null);
         keyValueResolver.set("key", "other", null);
         String value = keyValueResolver.getOrDefault("key", "default", resolverMock);
-        assertThat(value, is("other"));
+        assertThat(value).isEqualTo("other");
     }
 
     @Test
     void gettingAnIntValueThatDoesNotExistGivesDefault() {
         int value = keyValueResolver.getOrDefault("key", 3, resolverMock);
-        assertThat(value, is(3));
+        assertThat(value).isEqualTo(3);
     }
 
     @Test
     void settingAndGettingAnIntValueWithDefaultGivesStoredValue() {
         keyValueResolver.set("key", 7, null);
         int value = keyValueResolver.getOrDefault("key", 3, resolverMock);
-        assertThat(value, is(7));
+        assertThat(value).isEqualTo(7);
     }
 
     @Test
@@ -202,9 +196,9 @@ public class KeyValueResolverImplTest {
     void getOrDefineSetsAValueWithTheGivenDefault() {
         String text = "text";
         String value = keyValueResolver.getOrDefine("key", text, "descr", resolverMock);
-        assertThat(value, is(text));
+        assertThat(value).isEqualTo(text);
         value = keyValueResolver.getOrDefine("key", "other default", resolverMock);
-        assertThat(value, is(text));
+        assertThat(value).isEqualTo(text);
     }
 
     @Test
@@ -225,13 +219,13 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", defaultValue, null);
         keyValueResolver.set("key", overriddenValue, null, "domain1");
         String value = keyValueResolver.get("key", resolverMock);
-        assertThat(value, is(overriddenValue));
+        assertThat(value).isEqualTo(overriddenValue);
     }
 
     @Test
     void whenAKeyForASubdomainIsSetTheRootKeyGetsANullValue() {
         keyValueResolver.set("key", "value", "descr", "subdomain");
-        assertThat(keyValueResolver.get("key", resolverMock), nullValue());
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isNull();
     }
 
     @Test
@@ -242,7 +236,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", overriddenValue, null, "domain1");
         keyValueResolver.set("key", "yet another value", null, "yet another");
         String value = keyValueResolver.get("key", resolverMock);
-        assertThat(value, is(overriddenValue));
+        assertThat(value).isEqualTo(overriddenValue);
     }
 
     @Test
@@ -257,7 +251,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", overriddenValue, null, "domVal1", "domVal2");
         keyValueResolver.set("key", "yet another value", null, "domVal1", "other");
         String value = keyValueResolver.get("key", mockResolver);
-        assertThat(value, is(overriddenValue));
+        assertThat(value).isEqualTo(overriddenValue);
     }
 
     @Test
@@ -268,7 +262,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", defaultValue, null);
         keyValueResolver.set("key", overriddenValue1, null, "domain1");
         String value = keyValueResolver.get("key", resolverMock);
-        assertThat(value, is(overriddenValue1));
+        assertThat(value).isEqualTo(overriddenValue1);
     }
 
     @Test
@@ -296,7 +290,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.addDomains("domain1", "domain2");
         String value = "overridden value";
         keyValueResolver.set("key", value, null, "*", "domain2");
-        assertThat(keyValueResolver.get("key", resolverMock), is(value));
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isEqualTo(value);
     }
 
     @Test
@@ -306,14 +300,14 @@ public class KeyValueResolverImplTest {
         when(persistenceMock.load(eq(key), any(DomainSpecificValueFactory.class))).thenReturn(keyValues);
         keyValueResolver.setPersistence(persistenceMock);
         keyValueResolver.get(key);
-        assertThat(keyValueResolver.getKeyValues(key), notNullValue());
+        assertThat(keyValueResolver.getKeyValues(key)).isNotNull();
     }
 
     @Test
     void domainsThatAreInitializedAreUsed() {
         KeyValueResolver keyValueResolver1 = new KeyValueResolverImpl(persistenceMock, "dom1", "dom2");
         keyValueResolver1.set("key", "value", "dom1");
-        assertThat(keyValueResolver1.get("key", resolverMock), is("value"));
+        assertThat((String) keyValueResolver1.get("key", resolverMock)).isEqualTo("value");
     }
 
     @Test
@@ -335,7 +329,7 @@ public class KeyValueResolverImplTest {
         KeyValueResolverImpl keyValueResolver1 = new KeyValueResolverImpl(persistenceMock);
         verify(persistenceMock).loadAll(any(DomainSpecificValueFactory.class));
         keyValueResolver1.set("key", "value", "descr");
-        assertThat(keyValueResolver1.get("key"), is("value"));
+        assertThat((String) keyValueResolver1.get("key")).isEqualTo("value");
         keyValueResolver1.reload();
         verify(persistenceMock).reload(any(Collection.class), any(DomainSpecificValueFactory.class));
     }
@@ -344,13 +338,13 @@ public class KeyValueResolverImplTest {
     void reloadWithoutPersistenceDoesNothing() {
         keyValueResolver.set("key", "value", "descr");
         keyValueResolver.reload();
-        assertThat(keyValueResolver.get("key"), is("value"));
+        assertThat((String) keyValueResolver.get("key")).isEqualTo("value");
     }
 
     @Test
     void domainsThatAreInitializedArePresent() {
         keyValueResolver = new KeyValueResolverImpl("domain1", "domain2");
-        assertThat(keyValueResolver.dump().toString(), is("KeyValueResolver{domains=[domain1, domain2]\n}"));
+        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[domain1, domain2]\n}");
     }
 
     @Test
@@ -358,27 +352,27 @@ public class KeyValueResolverImplTest {
         String key = "key";
         keyValueResolver.set(key, "value", null);
         KeyValues keyValues = keyValueResolver.getKeyValues(key);
-        assertThat(keyValues.getDomainSpecificValues(), hasSize(1));
+        assertThat(keyValues.getDomainSpecificValues()).hasSize(1);
         String value = keyValues.get(new ArrayList<>(), null, null);
-        assertThat(value, is("value"));
+        assertThat(value).isEqualTo("value");
     }
 
     @Test
     void getKeyValuesTrimsTheKey() {
         keyValueResolver.set("key", "value", null);
-        assertThat(keyValueResolver.getKeyValues("  key"), notNullValue());
+        assertThat(keyValueResolver.getKeyValues("  key")).isNotNull();
     }
 
     @Test
     void keyValueResolverToString() {
-        assertThat(keyValueResolver.toString(), is("KeyValueResolver{domains=[]}"));
+        assertThat(keyValueResolver.toString()).isEqualTo("KeyValueResolver{domains=[]}");
     }
 
     @Test
     void toStringEmptyKeyValueResolver() {
-        assertThat(keyValueResolver.dump().toString(), is("KeyValueResolver{domains=[]\n}"));
+        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[]\n}");
         keyValueResolver.addDomains("domain");
-        assertThat(keyValueResolver.dump().toString(), is("KeyValueResolver{domains=[domain]\n}"));
+        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[domain]\n}");
     }
 
     @Test
@@ -387,19 +381,17 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", null);
         keyValueResolver.set("key", "value2", null, "domain1");
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
-        assertThat(keyValueResolver.dump().toString(), containsString(""));
+        assertThat(keyValueResolver.dump().toString()).contains("");
 
-        assertThat(keyValueResolver.dump().toString(), containsString("KeyValueResolver{domains=[domain1, domain2]\n"));
-        assertThat(keyValueResolver.dump().toString(), containsString("KeyValues for \"otherKey\": KeyValues{\n"));
-        assertThat(keyValueResolver.dump().toString(), containsString("\tdescription=\"\"\n"));
-        assertThat(keyValueResolver.dump().toString(),
-                containsString("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\""));
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n");
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValues for \"otherKey\": KeyValues{\n");
+        assertThat(keyValueResolver.dump().toString()).contains("\tdescription=\"\"\n");
+        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"");
 
-        assertThat(keyValueResolver.dump().toString(), containsString("KeyValues for \"key\": KeyValues{\n"));
-        assertThat(keyValueResolver.dump().toString(), containsString("\tdescription=\"\"\n"));
-        assertThat(keyValueResolver.dump().toString(),
-                containsString("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\""));
-        assertThat(keyValueResolver.dump().toString(), containsString("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\""));
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValues for \"key\": KeyValues{\n");
+        assertThat(keyValueResolver.dump().toString()).contains("\tdescription=\"\"\n");
+        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\"");
+        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
 
     }
 
@@ -410,8 +402,8 @@ public class KeyValueResolverImplTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         keyValueResolver.dump(new PrintStream(os));
         String output = os.toString("UTF8");
-        assertThat(output,
-                is("KeyValueResolver{domains=[dom1]\nKeyValues for \"key\": KeyValues{\n\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}\n}\n}\n"));
+        assertThat(output)
+                .isEqualTo("KeyValueResolver{domains=[dom1]\nKeyValues for \"key\": KeyValues{\n\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}\n}\n}\n");
     }
 
     @Test
@@ -423,7 +415,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "valueDom", "desc", "domVal");
         keyValueResolver.set("key", "valueDom2", "desc", "domVal", "dom2");
         keyValueResolver.set("key", "valueDom3", "desc", "domVal", "dom2", "dom3");
-        assertThat(keyValueResolver.get("key", domainResolver), is("valueDom"));
+        assertThat((String) keyValueResolver.get("key", domainResolver)).isEqualTo("valueDom");
     }
 
     @Test
@@ -436,8 +428,8 @@ public class KeyValueResolverImplTest {
         kvrWithPersistence.remove("key");
 
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("value", null));
-        assertThat(kvrWithPersistence.get("key", mock(DomainResolver.class)), nullValue());
-        assertThat(kvrWithPersistence.get("key", resolverMock), is("domValue"));
+        assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isNull();
+        assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue");
     }
 
     @Test
@@ -451,8 +443,8 @@ public class KeyValueResolverImplTest {
         kvrWithPersistence.remove("key", "dom1");
 
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("domValue1", null, "dom1"));
-        assertThat(kvrWithPersistence.get("key", mock(DomainResolver.class)), is("value"));
-        assertThat(kvrWithPersistence.get("key", resolverMock), is("domValue2"));
+        assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isEqualTo("value");
+        assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue2");
     }
     
     @Test
@@ -505,7 +497,7 @@ public class KeyValueResolverImplTest {
         kvrWithPersistence.set("key", "domValue1", "desc", "dom1");
         kvrWithPersistence.removeKey("key");
         verify(persistenceMock).remove("key");
-        assertThat(kvrWithPersistence.get("key", resolverMock), nullValue());
+        assertThat((String) kvrWithPersistence.get("key", resolverMock)).isNull();
     }
 
     @Test
@@ -520,9 +512,9 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", "descr");
         keyValueResolver.setWithChangeSet("key", "valueChangeSet", "descr", "changeSet");
         DomainResolver resolver = new MapBackedDomainResolver().addActiveChangeSets("changeSet");
-        assertThat(keyValueResolver.get("key", resolver), is("valueChangeSet"));
+        assertThat((String) keyValueResolver.get("key", resolver)).isEqualTo("valueChangeSet");
         keyValueResolver.removeWithChangeSet("key", "changeSet");
-        assertThat(keyValueResolver.get("key", resolver), is("value"));
+        assertThat((String) keyValueResolver.get("key", resolver)).isEqualTo("value");
     }
 
     @Test
@@ -532,13 +524,13 @@ public class KeyValueResolverImplTest {
         kvrWithPersistence.setWithChangeSet("key", "valueChangeSet", "descr", "changeSet");
         kvrWithPersistence.setWithChangeSet("otherKey", "otherValueChangeSet", "descr", "changeSet");
         DomainResolver resolver = new MapBackedDomainResolver().addActiveChangeSets("changeSet");
-        assertThat(kvrWithPersistence.get("key", resolver), is("valueChangeSet"));
-        assertThat(kvrWithPersistence.get("otherKey", resolver), is("otherValueChangeSet"));
+        assertThat((String) kvrWithPersistence.get("key", resolver)).isEqualTo("valueChangeSet");
+        assertThat((String) kvrWithPersistence.get("otherKey", resolver)).isEqualTo("otherValueChangeSet");
         kvrWithPersistence.removeChangeSet("changeSet");
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("valueChangeSet", "changeSet"));
         verify(persistenceMock).remove("otherKey", new DefaultDomainSpecificValueFactory().create("otherValueChangeSet", "changeSet"));
-        assertThat(kvrWithPersistence.get("key", resolver), is("value"));
-        assertThat(kvrWithPersistence.<String>get("otherKey", resolver), nullValue());
+        assertThat((String) kvrWithPersistence.get("key", resolver)).isEqualTo("value");
+        assertThat((String) kvrWithPersistence.<String>get("otherKey", resolver)).isNull();
     }
 
     @Test

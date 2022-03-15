@@ -17,12 +17,10 @@
 
 package com.nitrobox.keyvalueresolver.jmx;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.nitrobox.keyvalueresolver.KeyValueResolver;
 import com.nitrobox.keyvalueresolver.KeyValueResolverImpl;
@@ -46,18 +44,18 @@ public class KeyValueResolverManagerTest {
 
     @Test
     void keyValueResolverInstancesRegisterThemselvesWithTheManager() {
-        assertThat(manager.dump(), is(""));
+        assertThat(manager.dump()).isEqualTo("");
         new KeyValueResolverImpl();
-        assertThat(manager.dump(), is("KeyValueResolver{domains=[]\n}\n\n"));
+        assertThat(manager.dump()).isEqualTo("KeyValueResolver{domains=[]\n}\n\n");
     }
 
     @Test
     void keyValueResolverInstancesAreRemovedFromManagerAfterDestruction() {
         KeyValueResolver keyValueResolver = new KeyValueResolverImpl();
-        assertThat(manager.dump(), is("KeyValueResolver{domains=[]\n}\n\n"));
+        assertThat(manager.dump()).isEqualTo("KeyValueResolver{domains=[]\n}\n\n");
         keyValueResolver = null;
         System.gc();
-        assertThat(manager.dump(), is(""));
+        assertThat(manager.dump()).isEqualTo("");
     }
 
     @Test
@@ -68,10 +66,10 @@ public class KeyValueResolverManagerTest {
         KeyValueResolver keyValueResolver2 = new KeyValueResolverImpl();
         keyValueResolver2.set(key, "value2", "descr");
         String dump = manager.dump("key");
-        assertThat(dump, containsString("KeyValues{\n" +
-            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value1\"}\n}"));
-        assertThat(dump, containsString("KeyValues{\n" +
-            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value2\"}\n}"));
+        assertThat(dump).contains("KeyValues{\n" +
+            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value1\"}\n}");
+        assertThat(dump).contains("KeyValues{\n" +
+            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value2\"}\n}");
     }
 
     @Test
@@ -104,8 +102,8 @@ public class KeyValueResolverManagerTest {
     void listRoperties() {
         KeyValueResolver r1 = new KeyValueResolverImpl().addDomains("dom1");
         KeyValueResolver r2 = new KeyValueResolverImpl().addDomains("dom2");
-        assertThat(manager.listRoperties(), containsString("KeyValueResolver{domains=[dom1]}"));
-        assertThat(manager.listRoperties(), containsString("KeyValueResolver{domains=[dom2]}"));
+        assertThat(manager.listRoperties()).contains("KeyValueResolver{domains=[dom1]}");
+        assertThat(manager.listRoperties()).contains("KeyValueResolver{domains=[dom2]}");
     }
 
     @Test
