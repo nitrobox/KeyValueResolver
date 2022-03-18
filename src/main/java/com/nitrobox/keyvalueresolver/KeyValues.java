@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -81,8 +83,8 @@ public class KeyValues {
         DomainSpecificValue domainSpecificValue = domainSpecificValueFactory.create(value, changeSet, domainValues);
         if (domainSpecificValues.contains(domainSpecificValue)) {
             domainSpecificValues.stream()
-                .filter(dsv -> dsv.compareTo(domainSpecificValue) == 0)
-                .forEach(dsv -> dsv.setValue(domainSpecificValue.getValue()));
+                    .filter(dsv -> dsv.compareTo(domainSpecificValue) == 0)
+                    .forEach(dsv -> dsv.setValue(domainSpecificValue.getValue()));
         } else {
             domainSpecificValues.add(domainSpecificValue);
         }
@@ -98,7 +100,7 @@ public class KeyValues {
         String domainStr = buildDomain(domains, resolver);
         for (DomainSpecificValue domainSpecificValue : domainSpecificValues) {
             if ((resolver == null || domainSpecificValue.isInChangeSets(resolver.getActiveChangeSets()))
-                && domainSpecificValue.patternMatches(domainStr)) {
+                    && domainSpecificValue.patternMatches(domainStr)) {
                 return (T) domainSpecificValue.getValue();
             }
         }
@@ -152,14 +154,6 @@ public class KeyValues {
         this.domainSpecificValueFactory = domainSpecificValueFactory;
     }
 
-    public <T> T getDefaultValue() {
-        return (T) domainSpecificValues.stream()
-            .filter(DomainSpecificValue::isDefault)
-            .map(DomainSpecificValue::getValue)
-            .findAny()
-            .orElse(null);
-    }
-
     public DomainSpecificValue remove(final String changeSet, final String[] domainValues) {
         StringBuilder builder = new StringBuilder(domainValues.length * 8);
         for (String domainValue : domainValues) {
@@ -202,34 +196,82 @@ public class KeyValues {
     }
 
     private Collection<DomainSpecificValue> findMatchingValues(List<String> domains, DomainResolver resolver) {
-        Matcher matcher = buildMatcher(domains, resolver);
+        Matcher matcher = buildMatcher(domains, resolver, true);
 
         final Map<String, DomainSpecificValue> dvPatternMap = new HashMap<>();
         domainSpecificValues.stream()
-            .filter(val -> val.patternMatches(matcher, resolver))
-            .forEach(newDomainValue -> dvPatternMap.compute(newDomainValue.getPattern(), (k, existingDomainValue) -> {
-                if (existingDomainValue == null) {
-                    return newDomainValue;
-                }
-                if (existingDomainValue.noChangeSet()) {
-                    return newDomainValue;
-                }
-                if (newDomainValue.noChangeSet()) {
-                    return existingDomainValue;
-                }
-                return existingDomainValue.compareChangeSet(newDomainValue) < 0 ? existingDomainValue : newDomainValue;
-            }));
-        return dvPatternMap.values();
+                .filter(val -> val.patternMatches(matcher, resolver))
+                .forEach(newDomainValue -> dvPatternMap.compute(newDomainValue.getPattern(), (k, existingDomainValue) -> {
+                    if (existingDomainValue == null) {
+                        return newDomainValue;
+                    }
+                    if (existingDomainValue.noChangeSet()) {
+                        return newDomainValue;
+                    }
+                    if (newDomainValue.noChangeSet()) {
+                        return existingDomainValue;
+                    }
+                    return existingDomainValue.compareChangeSet(newDomainValue) < 0 ? existingDomainValue : newDomainValue;
+                }));
+        final Collection<DomainSpecificValue> values = dvPatternMap.values();
+        if (values.isEmpty()) {
+            return values;
+        }
+        /* in values we now have DomainSpecificValues where the pattern matches the domainValue and those with wildcards.
+         * Example 1: resolver has domainValues dom1 => domVal1 and dom2 => domVal2 there exist two DomainSpecificValues one with pattern
+         * "*|*|..." and one with pattern "*|domVal2|...". We only want to return the second, where one domain matches, but not the
+         * first, where the domains are wildcarded. A matching domain precedes a wildcard.
+         * Example 2: resolver has domainValues dom1 => domVal1 and dom2 => domVal2 there exist two DomainSpecificValues one with pattern
+         * "*|*|domVal3|" and one with pattern "*|*|other|". Both these values should be returned.
+         * Example 3: resolver has domainValues dom1 => domVal1 and dom2 => domVal2 there exist two DomainSpecificValues one with pattern
+         * "domVal1|*|" and one with pattern "*|domVal2|". Only the second should be returned, since it's more specific.
+         * So we search with progressively less specified resolvers wildcarding domain values from the left to the right to find the best
+         * match.
+         */
+        int index = 0;
+        Collection<DomainSpecificValue> result;
+        do {
+            MapBackedDomainResolver newResolver = getSubResolver(domains, resolver, index);
+            Matcher matcherNoWildcard = buildMatcher(domains, newResolver, false);
+            result = getDomainSpecificValue(resolver, values, matcherNoWildcard);
+            index++;
+        } while (result.isEmpty() && index <= domains.size());
+        return result;
     }
 
-    private static RegexMatcher buildMatcher(final Iterable<String> domains, final DomainResolver resolver) {
+    private MapBackedDomainResolver getSubResolver(List<String> domains, DomainResolver resolver, int index) {
+        final MapBackedDomainResolver newResolver = new MapBackedDomainResolver();
+        for (int i = index; i < domains.size(); i++) {
+            final String domain = domains.get(i);
+            newResolver.set(domain, resolver.getDomainValue(domain));
+        }
+        return newResolver;
+    }
+
+    private Collection<DomainSpecificValue> getDomainSpecificValue(DomainResolver resolver, Collection<DomainSpecificValue> values,
+            Matcher matcherNoWildcard) {
+        Collection<DomainSpecificValue> result = new HashSet<>();
+        for (DomainSpecificValue domainSpecificValue : values) {
+            if (domainSpecificValue.patternMatches(matcherNoWildcard, resolver)) {
+                result.add(domainSpecificValue);
+            }
+        }
+        return result;
+    }
+
+    private static RegexMatcher buildMatcher(final Iterable<String> domains, final DomainResolver resolver,
+            final boolean withWildcards) {
         StringBuilder builder = new StringBuilder();
         for (String domain : domains) {
             String domainValue = resolver.getDomainValue(domain);
-            if (domainValue == null || domainValue.equals("*")) {
+            if (domainValue == null) {
                 domainValue = "[^|]*";
+            } else if (domainValue.equals("*")) {
+                domainValue = "\\*";
             } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
                 throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
+            } else if (withWildcards) {
+                domainValue = "(" + domainValue + "|\\*)";
             }
             builder.append(domainValue).append("\\|");
         }
@@ -237,6 +279,9 @@ public class KeyValues {
             builder.delete(builder.length() - 7, builder.length());
         }
         builder.append(".*");
+        if (withWildcards) {
+            builder.append("|^$");
+        }
         return new RegexMatcher(builder.toString());
     }
 

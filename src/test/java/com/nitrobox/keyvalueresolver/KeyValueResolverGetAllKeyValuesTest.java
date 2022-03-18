@@ -37,7 +37,6 @@ public class KeyValueResolverGetAllKeyValuesTest {
         assertThat(allKeyValues).hasSize(1);
         final KeyValues keyValues = allKeyValues.iterator().next();
         assertThat(keyValues.getKey()).isEqualTo("key1");
-        assertThat((String) keyValues.getDefaultValue()).isEqualTo("value_1");
         final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
         assertThat(domainSpecificValues).containsExactlyInAnyOrder(
                 new DefaultDomainSpecificValueFactory().create("value_1", null),

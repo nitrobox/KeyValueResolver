@@ -472,7 +472,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value2Other", "descr", "dom1", "dom2Other", "dom3");
         keyValueResolver.set("key", "value3Other", "descr", "dom1", "dom2", "dom3Other");
         keyValueResolver.set("key", "value4", "descr", "dom1", "other", "dom3", "whatever");
-        keyValueResolver.removeAllMatching("key","dom1", "*", "dom3");
+        keyValueResolver.removeAllMatching("key","dom1", null, "dom3");
         final KeyValues keyValues = keyValueResolver.getKeyValues("key");
         assertThat(keyValues.getDomainSpecificValues()).hasSize(2);
         assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
@@ -486,7 +486,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.addDomains("domain1", "domain2");
         keyValueResolver.set("key", "value2", "descr", "dom1");
         keyValueResolver.set("key", "value3", "descr", "dom1", "dom2");
-        keyValueResolver.removeAllMatching("key","dom1", "*");
+        keyValueResolver.removeAllMatching("key","dom1", null);
         assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
     }
     

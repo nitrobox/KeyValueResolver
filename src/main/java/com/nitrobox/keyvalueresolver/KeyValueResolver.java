@@ -81,7 +81,7 @@ public interface KeyValueResolver {
 
     /**
      * Get those KeyValues stored in this KeyValueResolver instance, with only those DomainSpecificValues, where the provided resolver
-     * domains match or are wildcarded. The Default value of the KeyValues object is always returned, when present.
+     * domains match or are wildcarded.
      */
     Collection<KeyValues> getAllKeyValues(DomainResolver resolver);
 
