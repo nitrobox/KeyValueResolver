@@ -239,7 +239,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public KeyValues getKeyValues(String key, DomainResolver resolver) {
+    public KeyValues getKeyValues(String key, DomainResolver... resolver) {
         return getKeyValues(key).copy(domains, resolver);
     }
 
@@ -253,7 +253,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public Collection<KeyValues> getAllKeyValues(DomainResolver resolver) {
+    public Collection<KeyValues> getAllKeyValues(DomainResolver... resolver) {
         return valuesStore.getAllValues(domains, resolver);
     }
 

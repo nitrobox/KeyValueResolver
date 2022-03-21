@@ -72,7 +72,7 @@ public interface KeyValueResolver {
 
     KeyValues getKeyValues(String key);
 
-    KeyValues getKeyValues(String key, DomainResolver resolver);
+    KeyValues getKeyValues(String key, DomainResolver... resolver);
 
     /**
      * Get all KeyValues stored in this KeyValueResolver instance.
@@ -83,7 +83,7 @@ public interface KeyValueResolver {
      * Get those KeyValues stored in this KeyValueResolver instance, with only those DomainSpecificValues, where the provided resolver
      * domains match or are wildcarded.
      */
-    Collection<KeyValues> getAllKeyValues(DomainResolver resolver);
+    Collection<KeyValues> getAllKeyValues(DomainResolver... resolver);
 
     Collection<KeyValues> getAllKeyValues(String... domainValues);
 

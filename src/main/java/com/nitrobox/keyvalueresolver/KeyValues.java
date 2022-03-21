@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -189,14 +188,16 @@ public class KeyValues {
         return key;
     }
 
-    public KeyValues copy(List<String> domains, DomainResolver resolver) {
+    public KeyValues copy(List<String> domains, DomainResolver... resolvers) {
         KeyValues result = new KeyValues(key, domainSpecificValueFactory, description);
-        result.domainSpecificValues.addAll(findMatchingValues(domains, resolver));
+        for (DomainResolver resolver : resolvers) {
+            result.domainSpecificValues.addAll(findMatchingValues(domains, resolver));
+        }
         return result;
     }
 
     private Collection<DomainSpecificValue> findMatchingValues(List<String> domains, DomainResolver resolver) {
-        Matcher matcher = buildMatcher(domains, resolver, true);
+        Matcher matcher = buildMatcher(domains, true, resolver);
 
         final Map<String, DomainSpecificValue> dvPatternMap = new HashMap<>();
         domainSpecificValues.stream()
@@ -232,7 +233,7 @@ public class KeyValues {
         Collection<DomainSpecificValue> result;
         do {
             MapBackedDomainResolver newResolver = getSubResolver(domains, resolver, index);
-            Matcher matcherNoWildcard = buildMatcher(domains, newResolver, false);
+            Matcher matcherNoWildcard = buildMatcher(domains, false, newResolver);
             result = getDomainSpecificValue(resolver, values, matcherNoWildcard);
             index++;
         } while (result.isEmpty() && index <= domains.size());
@@ -259,8 +260,7 @@ public class KeyValues {
         return result;
     }
 
-    private static RegexMatcher buildMatcher(final Iterable<String> domains, final DomainResolver resolver,
-            final boolean withWildcards) {
+    private static RegexMatcher buildMatcher(final Iterable<String> domains, final boolean withWildcards, final DomainResolver resolver) {
         StringBuilder builder = new StringBuilder();
         for (String domain : domains) {
             String domainValue = resolver.getDomainValue(domain);
@@ -269,10 +269,33 @@ public class KeyValues {
             } else if (domainValue.equals("*")) {
                 domainValue = "\\*";
             } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
-                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
+                domainValue = "(" + domainValue.replace("*", "\\*") + ")";
+//                domainValue = Arrays.stream(domainValue.split("\\|"))
+//                        .map(dv -> parseNullAndWildcard(dv))
+//                        .collect(Collectors.joining("|"));
+//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
             } else if (withWildcards) {
                 domainValue = "(" + domainValue + "|\\*)";
             }
+
+/*
+            String domainValue = parseNullAndWildcard(resolver.getDomainValue(domain));
+//            if (domainValue.contains(DOMAIN_SEPARATOR)) {
+//                domainValue = Arrays.stream(domainValue.split("\\|"))
+//                        .map(dv -> parseNullAndWildcard(dv))
+//                        .collect(Collectors.joining("\\|"));
+//                
+//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
+//            }
+            if (withWildcards) {
+                domainValue = "(" + domainValue + "|\\*)";
+            }
+//            } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
+//                var domainValues = domainValue.split("\\|");
+//                
+//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
+//            }
+*/
             builder.append(domainValue).append("\\|");
         }
         while (builder.length() >= 7 && builder.lastIndexOf("[^|]*\\|") == builder.length() - 7) {
@@ -283,6 +306,13 @@ public class KeyValues {
             builder.append("|^$");
         }
         return new RegexMatcher(builder.toString());
+    }
+
+    private static String parseNullAndWildcard(String domainValue) {
+        if (domainValue.equals("*")) {
+            return "\\*";
+        }
+        return domainValue;
     }
 
     public void removeAll(List<String> domains, DomainResolver resolver) {

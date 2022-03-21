@@ -132,6 +132,32 @@ public class KeyValueResolverGetAllKeyValuesTest {
     }
 
     @Test
+    void getAllKeyValuesWithMultipleResolvers() {
+        keyValueResolver.set("key1", "value_1", "desc");
+        keyValueResolver.set("key1", "value_dom1", "desc", "domval1");
+        keyValueResolver.set("key1", "value_dom_2", "desc", "domval1", "domval2");
+        keyValueResolver.set("key1", "value_dom2", "desc", "domval2", "domval2");
+        keyValueResolver.set("key1", "value_dom_*", "desc", "*", "domval_other_2");
+        keyValueResolver.set("key1", "value_dom_another", "desc", "domval_another");
+        keyValueResolver.set("key1", "value_dom_other", "desc", "domval_other", "domval2");
+        keyValueResolver.set("key2", "val2", "desc", "other");
+
+        Collection<KeyValues> allKeyValues = keyValueResolver.getAllKeyValues(
+                new MapBackedDomainResolver().set("dom1", "domval1"),
+                new MapBackedDomainResolver().set("dom1", "domval2"));
+        assertThat(allKeyValues).hasSize(1);
+
+        final KeyValues keyValues = allKeyValues.iterator().next();
+        assertThat(keyValues.getKey()).isEqualTo("key1");
+        final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
+        assertThat(domainSpecificValues).containsExactlyInAnyOrder(
+                new DefaultDomainSpecificValueFactory().create("value_dom1", null, "domval1"),
+                new DefaultDomainSpecificValueFactory().create("value_dom_2", null, "domval1", "domval2"),
+                new DefaultDomainSpecificValueFactory().create("value_dom2", null, "domval2", "domval2")
+        );
+    }
+
+    @Test
     void getKeyValuesForASpecificDomainResolverGivesOnlyValuesForMatchingDomains() {
         keyValueResolver.set("key1", "value_dom1", "desc", "domval1");
         keyValueResolver.set("key1", "val", "desc", "domvalOther", "domval2");
@@ -143,7 +169,7 @@ public class KeyValueResolverGetAllKeyValuesTest {
                 new DefaultDomainSpecificValueFactory().create("value_dom2", null, "domval1", "domval2")
         );
     }
-    
+
     @Test
     void onlyTheBestMatchingKeyValuesAreReturned() {
         keyValueResolver.set("key1", "value_dom2", "desc", "*", "domval2");
