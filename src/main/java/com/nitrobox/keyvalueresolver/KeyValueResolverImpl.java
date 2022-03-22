@@ -240,7 +240,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public KeyValues getKeyValues(String key, DomainResolver... resolver) {
-        return getKeyValues(key).copy(domains, resolver);
+        final KeyValues keyValues = getKeyValues(key);
+        return keyValues != null ? keyValues.copy(domains, resolver) : null;
     }
 
     public void setDomainSpecificValueFactory(final DomainSpecificValueFactory domainSpecificValueFactory) {

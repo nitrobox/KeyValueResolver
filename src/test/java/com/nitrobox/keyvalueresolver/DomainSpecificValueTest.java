@@ -156,6 +156,18 @@ public class DomainSpecificValueTest {
     }
 
     @Test
+    void getDomainValuesForPatternWithEmptyValue() {
+        final String[] domainValues = DomainSpecificValue.withPattern("val", null, "pat1||pat3|").getDomainValues();
+        assertThat(domainValues).isEqualTo(new String[]{"pat1", "", "pat3"});
+    }
+
+    @Test
+    void getDomainValuesForPatternWithWildcardValue() {
+        final String[] domainValues = DomainSpecificValue.withPattern("val", null, "pat1|*|pat3|").getDomainValues();
+        assertThat(domainValues).isEqualTo(new String[]{"pat1", "*", "pat3"});
+    }
+
+    @Test
     void getDomainValuesForSingleValuePattern() {
         final String[] domainValues = DomainSpecificValue.withPattern("val", null, "pat|").getDomainValues();
         assertThat(domainValues).isEqualTo(new String[]{"pat"});

@@ -171,6 +171,13 @@ public class KeyValueResolverGetAllKeyValuesTest {
     }
 
     @Test
+    void getKeyValuesForASpecificDomainResolverWithoutAMatchGivesNull() {
+        final KeyValues keyValues = keyValueResolver.getKeyValues("key", new MapBackedDomainResolver()
+                .set("dom", "domval"));
+        assertThat(keyValues).isNull();
+    }
+
+    @Test
     void onlyTheBestMatchingKeyValuesAreReturned() {
         keyValueResolver.set("key1", "value_dom2", "desc", "*", "domval2");
         keyValueResolver.set("key1", "value_dom1&2", "desc", "domval1", "domval2");
