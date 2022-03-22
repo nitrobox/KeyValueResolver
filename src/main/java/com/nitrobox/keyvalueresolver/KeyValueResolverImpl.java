@@ -343,7 +343,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public Map<String, String> getDomainValuesMap(DomainSpecificValue domainSpecificValue) {
-        final String[] domainValues = domainSpecificValue.getPattern().split("\\|");
+        final String[] domainValues = domainSpecificValue.getDomainValues();
         final Map<String, String> result = new HashMap<>();
         int bothHaveValuesIndex = 0;
         for (; bothHaveValuesIndex < min(domains.size(), domainValues.length); bothHaveValuesIndex++) {

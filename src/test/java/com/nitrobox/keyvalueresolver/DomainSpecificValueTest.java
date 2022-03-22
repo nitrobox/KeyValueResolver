@@ -148,4 +148,22 @@ public class DomainSpecificValueTest {
         DomainSpecificValue dsv2 = DomainSpecificValue.withChangeSet("val", "changeSet", "pattern", "*", "b", "*", "x");
         assertThat(dsv1.getPattern()).isEqualTo(dsv2.getPattern());
     }
+
+    @Test
+    void getDomainValuesForEmptyPatternGivesEmptyArray() {
+        final String[] domainValues = DomainSpecificValue.withPattern("val", null, "").getDomainValues();
+        assertThat(domainValues).isEmpty();
+    }
+
+    @Test
+    void getDomainValuesForSingleValuePattern() {
+        final String[] domainValues = DomainSpecificValue.withPattern("val", null, "pat|").getDomainValues();
+        assertThat(domainValues).isEqualTo(new String[]{"pat"});
+    }
+
+    @Test
+    void getDomainValuesForMultiValuePattern() {
+        final String[] domainValues = DomainSpecificValue.withPattern("val", null, "pat1|pat2|pat3|").getDomainValues();
+        assertThat(domainValues).isEqualTo(new String[]{"pat1", "pat2", "pat3"});
+    }
 }

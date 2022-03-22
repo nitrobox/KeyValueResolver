@@ -96,10 +96,10 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
 
     /**
      * Sort DomainSpecificValue in reverse order as specified by ordering, changeSet and patternStr. This ordering defines the order of
-     * resolution that KeyValueResolver uses when a key is accessed. Values with a changeSet are ordered before values without a changeSet. Values
-     * with a changeSet are ordered alphabetically with other changeSets. A value from changeSet "A_ChangeSet" is chosen before a value in
-     * changeSet "B_ChangeSet". Values with the same ordering (and changeSet) are ordered by patternStr, just to define a consistent
-     * ordering.
+     * resolution that KeyValueResolver uses when a key is accessed. Values with a changeSet are ordered before values without a changeSet.
+     * Values with a changeSet are ordered alphabetically with other changeSets. A value from changeSet "A_ChangeSet" is chosen before a
+     * value in changeSet "B_ChangeSet". Values with the same ordering (and changeSet) are ordered by patternStr, just to define a
+     * consistent ordering.
      */
     @Override
     public int compareTo(final DomainSpecificValue other) {
@@ -154,10 +154,10 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
     @Override
     public String toString() {
         return "DomainSpecificValue{" +
-            "pattern=\"" + pattern +
-            "\", ordering=" + ordering +
-            (changeSet != null ? ", changeSet=\"" + changeSet + '"' : "") +
-            ", value=\"" + value + "\"}";
+                "pattern=\"" + pattern +
+                "\", ordering=" + ordering +
+                (changeSet != null ? ", changeSet=\"" + changeSet + '"' : "") +
+                ", value=\"" + value + "\"}";
     }
 
     public String getPattern() {
@@ -208,5 +208,12 @@ public class DomainSpecificValue implements Comparable<DomainSpecificValue> {
 
     public boolean isDefault() {
         return pattern.length() == 0;
+    }
+
+    public String[] getDomainValues() {
+        if (isDefault()) {
+            return new String[0];
+        }
+        return pattern.split("\\|");
     }
 }
