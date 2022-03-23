@@ -144,11 +144,6 @@ public class KeyValues {
         return Collections.unmodifiableSet(domainSpecificValues);
     }
 
-    public void setDomainSpecificValues(Collection<DomainSpecificValue> values) {
-        domainSpecificValues.clear();
-        domainSpecificValues.addAll(values);
-    }
-
     public void setDomainSpecificValueFactory(final DomainSpecificValueFactory domainSpecificValueFactory) {
         this.domainSpecificValueFactory = domainSpecificValueFactory;
     }
@@ -270,32 +265,9 @@ public class KeyValues {
                 domainValue = "\\*";
             } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
                 domainValue = "(" + domainValue.replace("*", "\\*") + ")";
-//                domainValue = Arrays.stream(domainValue.split("\\|"))
-//                        .map(dv -> parseNullAndWildcard(dv))
-//                        .collect(Collectors.joining("|"));
-//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
             } else if (withWildcards) {
                 domainValue = "(" + domainValue + "|\\*)";
             }
-
-/*
-            String domainValue = parseNullAndWildcard(resolver.getDomainValue(domain));
-//            if (domainValue.contains(DOMAIN_SEPARATOR)) {
-//                domainValue = Arrays.stream(domainValue.split("\\|"))
-//                        .map(dv -> parseNullAndWildcard(dv))
-//                        .collect(Collectors.joining("\\|"));
-//                
-//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
-//            }
-            if (withWildcards) {
-                domainValue = "(" + domainValue + "|\\*)";
-            }
-//            } else if (domainValue.contains(DOMAIN_SEPARATOR)) {
-//                var domainValues = domainValue.split("\\|");
-//                
-//                throw new IllegalArgumentException("domainValues may not contain '" + DOMAIN_SEPARATOR + '\'');
-//            }
-*/
             builder.append(domainValue).append("\\|");
         }
         while (builder.length() >= 7 && builder.lastIndexOf("[^|]*\\|") == builder.length() - 7) {
@@ -308,14 +280,11 @@ public class KeyValues {
         return new RegexMatcher(builder.toString());
     }
 
-    private static String parseNullAndWildcard(String domainValue) {
-        if (domainValue.equals("*")) {
-            return "\\*";
-        }
-        return domainValue;
-    }
-
     public void removeAll(List<String> domains, DomainResolver resolver) {
         this.domainSpecificValues.removeAll(findMatchingValues(domains, resolver));
+    }
+    
+    public boolean isEmpty() {
+        return domainSpecificValues.isEmpty();
     }
 }

@@ -6,6 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -14,81 +18,96 @@ import java.util.stream.Collectors;
 public class ValuesStore {
 
     private final Map<String, KeyValues> keyValuesMap = new HashMap<>();
+    private final ReadWriteLockTool lock = new ReadWriteLockTool();
     private DomainSpecificValueFactory domainSpecificValueFactory;
     private Persistence persistence;
 
     public Collection<KeyValues> getAllValues() {
-        return Collections.unmodifiableCollection(keyValuesMap.values());
+        return lock.readLocked(() -> Collections.unmodifiableCollection(keyValuesMap.values()));
     }
 
     public Collection<KeyValues> getAllValues(List<String> domains, DomainResolver... resolver) {
-        return keyValuesMap.values().stream()
+        return lock.readLocked(() -> keyValuesMap.values().stream()
                 .map(keyValues -> keyValues.copy(domains, resolver))
-                .filter(keyValues -> !keyValues.getDomainSpecificValues().isEmpty())
-                .collect(Collectors.toUnmodifiableList());
+                .filter(keyValues -> !keyValues.isEmpty())
+                .collect(Collectors.toUnmodifiableList()));
     }
 
     public void setAllValues(Collection<? extends KeyValues> values) {
-        synchronized (keyValuesMap) {
+        lock.writeLocked(() -> {
             keyValuesMap.clear();
             values.forEach(kv -> keyValuesMap.put(kv.getKey(), kv));
-        }
+        });
     }
 
-    public KeyValues getOrCreateKeyValues(final String key, final String description) {
+    public void setWithChangeSet(String key, String description, String changeSet, final Object value, final String... domainValues) {
+        KeyValues keyValues = getOrCreateKeyValues(key, description);
+        final DomainSpecificValue domainSpecificValue = keyValues.putWithChangeSet(changeSet, value, domainValues);
+        store(key, keyValues, domainSpecificValue);
+    }
+
+    /*package*/ KeyValues getOrCreateKeyValues(final String key, final String description) {
         KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
-        if (keyValues == null) {
-            synchronized (keyValuesMap) {
-                keyValues = keyValuesMap.computeIfAbsent(key, k -> new KeyValues(key, domainSpecificValueFactory, description));
-            }
+        if (keyValues != null) {
+            return keyValues;
         }
-        return keyValues;
+        return lock.writeLocked(() -> keyValuesMap.computeIfAbsent(key, k -> new KeyValues(key, domainSpecificValueFactory, description)));
+    }
+
+    private void store(final String key, final KeyValues keyValues, DomainSpecificValue domainSpecificValue) {
+        if (persistence != null) {
+            persistence.store(key, keyValues, domainSpecificValue);
+        }
     }
 
     public KeyValues getKeyValuesFromMapOrPersistence(final String key) {
-        KeyValues keyValues = keyValuesMap.get(key);
-        if (keyValues == null) {
-            keyValues = load(key);
-            if (keyValues != null) {
-                synchronized (keyValuesMap) {
-                    KeyValues keyValuesSecondTry = keyValuesMap.get(key);
-                    if (keyValuesSecondTry == null) {
-                        keyValuesMap.put(key, keyValues);
-                    } else {
-                        return keyValuesSecondTry;
-                    }
-                }
-            }
+        final KeyValues keyValues = lock.readLocked(() -> keyValuesMap.get(key));
+        if (keyValues != null) {
+            return keyValues;
         }
-        return keyValues;
+        final KeyValues loadedKeyValues = load(key);
+        if (loadedKeyValues == null) {
+            return null;
+        }
+        return lock.writeLocked(() -> {
+            KeyValues keyValuesSecondTry = keyValuesMap.get(key);
+            if (keyValuesSecondTry == null) {
+                keyValuesMap.put(key, loadedKeyValues);
+                return loadedKeyValues;
+            } else {
+                return keyValuesSecondTry;
+            }
+        });
     }
 
     public String dump() {
-        StringBuilder builder = new StringBuilder(keyValuesMap.size() * 16);
-        for (Map.Entry<String, KeyValues> entry : keyValuesMap.entrySet()) {
-            builder.append('\n').append("KeyValues for \"").append(entry.getKey()).append("\": ").append(entry.getValue());
-        }
-        return builder.toString();
+        return lock.readLocked(() -> {
+            StringBuilder builder = new StringBuilder(keyValuesMap.size() * 16);
+            for (Map.Entry<String, KeyValues> entry : keyValuesMap.entrySet()) {
+                builder.append('\n').append("KeyValues for \"").append(entry.getKey()).append("\": ").append(entry.getValue());
+            }
+            return builder.toString();
+        });
     }
 
     public void dump(PrintStream out) {
-        for (Map.Entry<String, KeyValues> entry : keyValuesMap.entrySet()) {
-            out.println();
-            out.print("KeyValues for \"");
-            out.print(entry.getKey());
-            out.print("\": ");
-            out.print(entry.getValue());
-        }
+        lock.readLocked(() -> {
+            for (Map.Entry<String, KeyValues> entry : keyValuesMap.entrySet()) {
+                out.println();
+                out.print("KeyValues for \"");
+                out.print(entry.getKey());
+                out.print("\": ");
+                out.print(entry.getValue());
+            }
+        });
     }
 
     public KeyValues getValuesFor(String key) {
-        return keyValuesMap.get(key);
+        return lock.readLocked(() -> keyValuesMap.get(key));
     }
 
     public KeyValues remove(String key) {
-        synchronized (keyValuesMap) {
-            return keyValuesMap.remove(key);
-        }
+        return lock.writeLocked(() -> keyValuesMap.remove(key));
     }
 
     private KeyValues load(final String key) {
@@ -113,10 +132,17 @@ public class ValuesStore {
     }
 
     public void removeChangeSet(String changeSet) {
-        for (KeyValues keyValues : keyValuesMap.values()) {
-            for (DomainSpecificValue value : keyValues.removeChangeSet(changeSet)) {
-                persistence.remove(keyValues.getKey(), value);
+        lock.readLocked(() -> {
+            for (KeyValues keyValues : keyValuesMap.values()) {
+                final Collection<DomainSpecificValue> domainSpecificValues = keyValues.removeChangeSet(changeSet);
+                if (keyValues.isEmpty()) {
+                    persistence.remove(keyValues.getKey());
+                } else {
+                    for (DomainSpecificValue value : domainSpecificValues) {
+                        persistence.remove(keyValues.getKey(), value);
+                    }
+                }
             }
-        }
+        });
     }
 }

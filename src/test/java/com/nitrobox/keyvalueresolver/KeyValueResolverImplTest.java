@@ -528,7 +528,7 @@ public class KeyValueResolverImplTest {
         assertThat((String) kvrWithPersistence.get("otherKey", resolver)).isEqualTo("otherValueChangeSet");
         kvrWithPersistence.removeChangeSet("changeSet");
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("valueChangeSet", "changeSet"));
-        verify(persistenceMock).remove("otherKey", new DefaultDomainSpecificValueFactory().create("otherValueChangeSet", "changeSet"));
+        verify(persistenceMock).remove("otherKey");
         assertThat((String) kvrWithPersistence.get("key", resolver)).isEqualTo("value");
         assertThat((String) kvrWithPersistence.<String>get("otherKey", resolver)).isNull();
     }

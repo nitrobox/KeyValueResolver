@@ -171,9 +171,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     public void set(final String key, final Object value, final String description, final String... domainValues) {
         final String trimmedKey = trimKey(key);
         LOGGER.debug("Storing value: '{}' for key: '{}' with given domains: '{}'.", value, trimmedKey, domainValues);
-        KeyValues keyValues = valuesStore.getOrCreateKeyValues(trimmedKey, description);
-        final DomainSpecificValue domainSpecificValue = keyValues.put(value, domainValues);
-        store(trimmedKey, keyValues, domainSpecificValue);
+        valuesStore.setWithChangeSet(trimmedKey, description, null, value, domainValues);
     }
 
     @Override
@@ -182,15 +180,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         final String trimmedKey = trimKey(key);
         LOGGER.debug("Storing value: '{}' for key: '{}' for change set: '{}' with given domains: '{}'.", value, trimmedKey, changeSet,
                 domainValues);
-        KeyValues keyValues = valuesStore.getOrCreateKeyValues(trimmedKey, description);
-        final DomainSpecificValue domainSpecificValue = keyValues.putWithChangeSet(changeSet, value, domainValues);
-        store(trimmedKey, keyValues, domainSpecificValue);
-    }
-
-    private void store(final String key, final KeyValues keyValues, DomainSpecificValue domainSpecificValue) {
-        if (persistence != null) {
-            persistence.store(key, keyValues, domainSpecificValue);
-        }
+        valuesStore.setWithChangeSet(trimmedKey, description, changeSet, value, domainValues);
     }
 
     private void remove(final String key, final DomainSpecificValue domainSpecificValue) {
@@ -291,7 +281,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         KeyValues keyValues = valuesStore.getKeyValuesFromMapOrPersistence(trimmedKey);
         if (keyValues != null) {
             remove(trimmedKey, keyValues.remove(changeSet, domainValues));
-            if (keyValues.getDomainSpecificValues().isEmpty()) {
+            if (keyValues.isEmpty()) {
                 removeKey(trimmedKey);
             }
         }
@@ -308,7 +298,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         final KeyValues keyValues = valuesStore.getKeyValuesFromMapOrPersistence(trimmedKey);
         if (keyValues != null) {
             keyValues.removeAll(domains, resolverFor(domainValues));
-            if (keyValues.getDomainSpecificValues().isEmpty()) {
+            if (keyValues.isEmpty()) {
                 removeKey(trimmedKey);
             }
         }
