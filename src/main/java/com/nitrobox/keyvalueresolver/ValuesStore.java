@@ -149,12 +149,8 @@ public class ValuesStore {
         lock.readLocked(() -> {
             for (KeyValues keyValues : keyValuesMap.values()) {
                 final Collection<DomainSpecificValue> domainSpecificValues = keyValues.removeChangeSet(changeSet);
-                if (keyValues.isEmpty()) {
-                    persistence.remove(keyValues.getKey());
-                } else {
-                    for (DomainSpecificValue value : domainSpecificValues) {
-                        persistence.remove(keyValues.getKey(), value);
-                    }
+                for (DomainSpecificValue value : domainSpecificValues) {
+                    removeFromPersistence(keyValues.getKey(), value);
                 }
             }
         });
