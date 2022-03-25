@@ -448,13 +448,16 @@ public class KeyValueResolverImplTest {
     }
     
     @Test
-    void removeLastDomainSpecificValueRemovesKeyCompletely() {
+    void removeLastDomainSpecificValueDoesNotRemoveKeyCompletely() {
         keyValueResolver.addDomains("domain1", "domain2", "domain3");
         keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
         keyValueResolver.set("key", "value3", "descr", "dom1", "dom2", "dom3");
         keyValueResolver.remove("key", "dom1", "dom2");
         keyValueResolver.remove("key", "dom1", "dom2", "dom3");
-        assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
+        assertThat(keyValueResolver.getAllKeyValues()).hasSize(1);
+        final KeyValues keyValues = keyValueResolver.getAllKeyValues().iterator().next();
+        assertThat(keyValues.getDomainSpecificValues()).isEmpty();
+        assertThat(keyValues.getKey()).isEqualTo("key");
     }
 
     @Test

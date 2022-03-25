@@ -43,7 +43,6 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyValueResolverImpl.class);
     private final ValuesStore valuesStore = new ValuesStore();
     private final List<String> domains = new CopyOnWriteArrayList<>();
-    private Persistence persistence;
 
     public KeyValueResolverImpl(final Persistence persistence, DomainSpecificValueFactory domainSpecificValueFactory) {
         initFromPersistence(persistence, domainSpecificValueFactory);
@@ -70,7 +69,6 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     private void initFromPersistence(final Persistence persistence, final DomainSpecificValueFactory domainSpecificValueFactory) {
         Objects.requireNonNull(domainSpecificValueFactory, "\"domainSpecificValueFactory\" must not be null");
         Objects.requireNonNull(persistence, "\"persistence\" must not be null");
-        this.persistence = persistence;
         valuesStore.setDomainSpecificValueFactory(domainSpecificValueFactory);
         valuesStore.setPersistence(persistence);
         valuesStore.setAllValues(persistence.loadAll(domainSpecificValueFactory));
@@ -183,15 +181,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         valuesStore.setWithChangeSet(trimmedKey, description, changeSet, value, domainValues);
     }
 
-    private void remove(final String key, final DomainSpecificValue domainSpecificValue) {
-        if (persistence != null && domainSpecificValue != null) {
-            persistence.remove(key, domainSpecificValue);
-        }
-    }
-
     public void setPersistence(final Persistence persistence) {
         Objects.requireNonNull(persistence, "\"persistence\" must not be null");
-        this.persistence = persistence;
         valuesStore.setPersistence(persistence);
         KeyValueResolverManager.getInstance().add(this);
     }
@@ -224,13 +215,12 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public KeyValues getKeyValues(final String key) {
-        Ensure.notEmpty(key, "key");
-        return valuesStore.getValuesFor(key.trim());
+        return valuesStore.getValuesFor(trimKey(key));
     }
 
     @Override
     public KeyValues getKeyValues(String key, DomainResolver... resolver) {
-        final KeyValues keyValues = getKeyValues(key);
+        final KeyValues keyValues = getKeyValues(trimKey(key));
         return keyValues != null ? keyValues.copy(domains, resolver) : null;
     }
 
@@ -277,14 +267,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
-        final String trimmedKey = trimKey(key);
-        KeyValues keyValues = valuesStore.getKeyValuesFromMapOrPersistence(trimmedKey);
-        if (keyValues != null) {
-            remove(trimmedKey, keyValues.remove(changeSet, domainValues));
-            if (keyValues.isEmpty()) {
-                removeKey(trimmedKey);
-            }
-        }
+        valuesStore.removeWithChangeSet(trimKey(key), changeSet, domainValues);
     }
 
     @Override
@@ -306,11 +289,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public void removeKey(final String key) {
-        final String trimmedKey = trimKey(key);
-        valuesStore.remove(trimmedKey);
-        if (persistence != null) {
-            persistence.remove(trimmedKey);
-        }
+        valuesStore.remove(trimKey(key));
     }
 
     @Override

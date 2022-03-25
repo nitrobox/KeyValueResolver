@@ -6,10 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -107,7 +103,11 @@ public class ValuesStore {
     }
 
     public KeyValues remove(String key) {
-        return lock.writeLocked(() -> keyValuesMap.remove(key));
+        final KeyValues keyValues = lock.writeLocked(() -> keyValuesMap.remove(key));
+        if (persistence != null) {
+            persistence.remove(key);
+        }
+        return keyValues;
     }
 
     private KeyValues load(final String key) {
@@ -128,6 +128,20 @@ public class ValuesStore {
     public void reload() {
         if (persistence != null) {
             setAllValues(persistence.reload(getAllValues(), domainSpecificValueFactory));
+        }
+    }
+
+    public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
+        KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
+        if (keyValues != null) {
+            final DomainSpecificValue removedValue = keyValues.remove(changeSet, domainValues);
+            removeFromPersistence(key, removedValue);
+        }
+    }
+
+    private void removeFromPersistence(final String key, final DomainSpecificValue domainSpecificValue) {
+        if (persistence != null && domainSpecificValue != null) {
+            persistence.remove(key, domainSpecificValue);
         }
     }
 
