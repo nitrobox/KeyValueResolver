@@ -105,11 +105,13 @@ public class ValuesStore {
     }
 
     public KeyValues remove(String key) {
-        final KeyValues keyValues = lock.writeLocked(() -> keyValuesMap.remove(key));
-        if (persistence != null) {
-            persistence.remove(key);
-        }
-        return keyValues;
+        return lock.writeLocked(() -> {
+            final KeyValues keyValues = keyValuesMap.remove(key);
+            if (persistence != null) {
+                persistence.remove(key);
+            }
+            return keyValues;
+        });
     }
 
     private KeyValues load(final String key) {
@@ -134,11 +136,13 @@ public class ValuesStore {
     }
 
     public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
-        KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
-        if (keyValues != null) {
-            final DomainSpecificValue removedValue = keyValues.remove(changeSet, domainValues);
-            removeFromPersistence(key, removedValue);
-        }
+        lock.writeLocked(() -> {
+            KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
+            if (keyValues != null) {
+                final DomainSpecificValue removedValue = keyValues.remove(changeSet, domainValues);
+                removeFromPersistence(key, removedValue);
+            }
+        });
     }
 
     private void removeFromPersistence(final String key, final DomainSpecificValue domainSpecificValue) {
@@ -148,7 +152,7 @@ public class ValuesStore {
     }
 
     public void removeChangeSet(String changeSet) {
-        lock.readLocked(() -> {
+        lock.writeLocked(() -> {
             for (KeyValues keyValues : keyValuesMap.values()) {
                 final Collection<DomainSpecificValue> domainSpecificValues = keyValues.removeChangeSet(changeSet);
                 for (DomainSpecificValue value : domainSpecificValues) {

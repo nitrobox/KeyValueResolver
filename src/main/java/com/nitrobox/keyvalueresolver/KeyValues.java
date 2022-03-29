@@ -59,9 +59,11 @@ public class KeyValues {
     public KeyValues(String key, final DomainSpecificValueFactory domainSpecificValueFactory, String description,
             List<DomainSpecificValue> domainSpecificValues) {
         this(key, domainSpecificValueFactory, description);
-        domainSpecificValues.addAll(domainSpecificValues);
+        if (domainSpecificValues != null) {
+            domainSpecificValues.addAll(domainSpecificValues);
+        }
     }
-    
+
     public DomainSpecificValue put(Object value, List<String> domainValues) {
         return putWithChangeSet(null, value, domainValues);
     }
@@ -289,7 +291,7 @@ public class KeyValues {
     public void removeAll(List<String> domains, DomainResolver resolver) {
         this.domainSpecificValues.removeAll(findMatchingValues(domains, resolver));
     }
-    
+
     public boolean isEmpty() {
         return domainSpecificValues.isEmpty();
     }
