@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +59,14 @@ public class KeyValuesTest {
         assertThat(keyValues.getDescription()).isEqualTo("");
     }
 
+    @Test
+    void domainSpecificValuesCanBeInitialized() {
+        KeyValues keyValues = new KeyValues("key", new DefaultDomainSpecificValueFactory(), null, List.of(
+                DomainSpecificValue.withoutChangeSet("value", "dom1"),
+                DomainSpecificValue.withoutChangeSet("value", "dom1", "dom2")));
+        assertThat(keyValues.getDomainSpecificValues()).hasSize(2);
+    }
+    
     @Test
     void toStringEmpty() {
         assertThat(keyValues.toString()).isEqualTo("KeyValues{\n\tdescription=\"\"\n" +
@@ -202,7 +211,7 @@ public class KeyValuesTest {
         keyValues.put("value_2", "domain1", "*", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom1", "domain1"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "*", "domain3")
+                DomainSpecificValue.withoutChangeSet("value_2", "domain1", "*", "domain3")
         );
     }
 
@@ -212,8 +221,8 @@ public class KeyValuesTest {
         keyValues.put("value_2", "*", "domain2", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom1", "domain1"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_1", null, "*", "*", "domain3"),
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "*", "domain2", "domain3")
+                DomainSpecificValue.withoutChangeSet("value_1", "*", "*", "domain3"),
+                DomainSpecificValue.withoutChangeSet("value_2", "*", "domain2", "domain3")
         );
     }
 
@@ -225,7 +234,7 @@ public class KeyValuesTest {
                 .set("dom1", "domain1")
                 .set("dom2", "domain2"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "*", "domain2", "domain3")
+                DomainSpecificValue.withoutChangeSet("value_2", "*", "domain2", "domain3")
         );
     }
 
@@ -239,7 +248,7 @@ public class KeyValuesTest {
                 .set("dom2", "domain_X2")
                 .set("dom3", "domain_X3"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_*", null)
+                DomainSpecificValue.withoutChangeSet("value_*")
         );
     }
 
@@ -252,8 +261,8 @@ public class KeyValuesTest {
         keyValues.put("value_4", "domain1", "domain2", "domain3");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2", "dom3"), new MapBackedDomainResolver().set("dom2", "domain2"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "domain2"),
-                new DefaultDomainSpecificValueFactory().create("value_4", null, "domain1", "domain2", "domain3")
+                DomainSpecificValue.withoutChangeSet("value_2", "domain1", "domain2"),
+                DomainSpecificValue.withoutChangeSet("value_4", "domain1", "domain2", "domain3")
         );
     }
 
@@ -268,10 +277,10 @@ public class KeyValuesTest {
         keyValues.put("value_7", "domainA", "domainY");
         final KeyValues copy = keyValues.copy(asList("dom1", "dom2"), new MapBackedDomainResolver().set("dom2", "domain2|domainX|*"));
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "domain2"),
-                new DefaultDomainSpecificValueFactory().create("value_3", null, "domain1", "domainX"),
-                new DefaultDomainSpecificValueFactory().create("value_5", null, "domain1", "*"),
-                new DefaultDomainSpecificValueFactory().create("value_6", null, "domainA", "*")
+                DomainSpecificValue.withoutChangeSet("value_2", "domain1", "domain2"),
+                DomainSpecificValue.withoutChangeSet("value_3", "domain1", "domainX"),
+                DomainSpecificValue.withoutChangeSet("value_5", "domain1", "*"),
+                DomainSpecificValue.withoutChangeSet("value_6", "domainA", "*")
         );
     }
 
@@ -290,8 +299,8 @@ public class KeyValuesTest {
                 new MapBackedDomainResolver().set("dom1", "domainNone").set("dom2", "domainX")
         );
         assertThat(copy.getDomainSpecificValues()).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value_2", null, "domain1", "domain2"),
-                new DefaultDomainSpecificValueFactory().create("value_3", null, "domain1", "domainX")
+                DomainSpecificValue.withoutChangeSet("value_2", "domain1", "domain2"),
+                DomainSpecificValue.withoutChangeSet("value_3", "domain1", "domainX")
         );
     }
 }

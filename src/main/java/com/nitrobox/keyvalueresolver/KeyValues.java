@@ -60,7 +60,7 @@ public class KeyValues {
             List<DomainSpecificValue> domainSpecificValues) {
         this(key, domainSpecificValueFactory, description);
         if (domainSpecificValues != null) {
-            domainSpecificValues.addAll(domainSpecificValues);
+            this.domainSpecificValues.addAll(domainSpecificValues);
         }
     }
 
