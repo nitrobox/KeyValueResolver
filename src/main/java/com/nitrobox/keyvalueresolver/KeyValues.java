@@ -288,8 +288,10 @@ public class KeyValues {
         return new RegexMatcher(builder.toString());
     }
 
-    public void removeAll(List<String> domains, DomainResolver resolver) {
-        this.domainSpecificValues.removeAll(findMatchingValues(domains, resolver));
+    public Collection<DomainSpecificValue> removeAll(List<String> domains, DomainResolver resolver) {
+        final Collection<DomainSpecificValue> matchingValues = findMatchingValues(domains, resolver);
+        this.domainSpecificValues.removeAll(matchingValues);
+        return matchingValues;
     }
 
     public boolean isEmpty() {

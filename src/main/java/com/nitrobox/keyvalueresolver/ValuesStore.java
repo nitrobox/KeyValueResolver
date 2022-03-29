@@ -1,5 +1,7 @@
 package com.nitrobox.keyvalueresolver;
 
+import static com.nitrobox.keyvalueresolver.KeyValueResolverImpl.resolverFor;
+
 import java.io.PrintStream;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,8 +141,17 @@ public class ValuesStore {
         lock.writeLocked(() -> {
             KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
             if (keyValues != null) {
-                final DomainSpecificValue removedValue = keyValues.remove(changeSet, domainValues);
-                removeFromPersistence(key, removedValue);
+                removeFromPersistence(key, keyValues.remove(changeSet, domainValues));
+            }
+        });
+    }
+
+    public void removeAllMatching(String key, List<String> domains, String... domainValues) {
+        lock.writeLocked(() -> {
+            final KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
+            if (keyValues != null) {
+                keyValues.removeAll(domains, resolverFor(domains, domainValues))
+                        .forEach(domainSpecificValue -> removeFromPersistence(key, domainSpecificValue));
             }
         });
     }
