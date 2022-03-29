@@ -56,6 +56,12 @@ public class KeyValues {
         this.description = description;
     }
 
+    public KeyValues(String key, final DomainSpecificValueFactory domainSpecificValueFactory, String description,
+            List<DomainSpecificValue> domainSpecificValues) {
+        this(key, domainSpecificValueFactory, description);
+        domainSpecificValues.addAll(domainSpecificValues);
+    }
+    
     public DomainSpecificValue put(Object value, List<String> domainValues) {
         return putWithChangeSet(null, value, domainValues);
     }
