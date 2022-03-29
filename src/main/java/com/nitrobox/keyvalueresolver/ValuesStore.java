@@ -37,9 +37,11 @@ public class ValuesStore {
     }
 
     public void setWithChangeSet(String key, String description, String changeSet, final Object value, final String... domainValues) {
-        KeyValues keyValues = getOrCreateKeyValues(key, description);
-        final DomainSpecificValue domainSpecificValue = keyValues.putWithChangeSet(changeSet, value, domainValues);
-        store(key, keyValues, domainSpecificValue);
+        lock.writeLocked(() -> {
+            KeyValues keyValues = getOrCreateKeyValues(key, description);
+            final DomainSpecificValue domainSpecificValue = keyValues.putWithChangeSet(changeSet, value, domainValues);
+            store(key, keyValues, domainSpecificValue);
+        });
     }
 
     /*package*/ KeyValues getOrCreateKeyValues(final String key, final String description) {
