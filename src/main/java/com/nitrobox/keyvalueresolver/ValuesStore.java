@@ -152,6 +152,9 @@ public class ValuesStore {
             if (keyValues != null) {
                 keyValues.removeAll(domains, resolverFor(domains, domainValues))
                         .forEach(domainSpecificValue -> removeFromPersistence(key, domainSpecificValue));
+                if (keyValues.isEmpty()) {
+                    remove(key);
+                }
             }
         });
     }

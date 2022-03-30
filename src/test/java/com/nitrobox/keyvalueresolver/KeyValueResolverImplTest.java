@@ -490,9 +490,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value2", "descr", "dom1");
         keyValueResolver.set("key", "value3", "descr", "dom1", "dom2");
         keyValueResolver.removeAllMatching("key","dom1", null);
-        assertThat(keyValueResolver.getAllKeyValues()).hasSize(1);
-        final KeyValues keyValues = keyValueResolver.getAllKeyValues().iterator().next();
-        assertThat(keyValues.isEmpty()).isTrue();
+        assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
     }
     
     @Test
