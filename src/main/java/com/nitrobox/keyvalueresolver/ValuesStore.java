@@ -137,6 +137,19 @@ public class ValuesStore {
         }
     }
 
+    public void reload(String key) {
+        if (persistence != null) {
+            final KeyValues keyValues = persistence.load(key, domainSpecificValueFactory);
+            lock.writeLocked(() -> {
+                if (keyValues != null) {
+                    keyValuesMap.put(key, keyValues);
+                } else {
+                    remove(key);
+                }
+            });
+        }
+    }
+
     public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
         lock.writeLocked(() -> {
             KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);

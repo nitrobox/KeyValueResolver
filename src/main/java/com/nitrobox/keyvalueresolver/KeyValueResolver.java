@@ -66,6 +66,8 @@ public interface KeyValueResolver {
 
     void reload();
 
+    void reload(String key);
+
     StringBuilder dump();
 
     void dump(PrintStream out);

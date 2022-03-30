@@ -193,6 +193,11 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
+    public void reload(String key) {
+        valuesStore.reload(trimKey(key));
+    }
+
+    @Override
     public String toString() {
         return "KeyValueResolver{domains=" + domains + '}';
     }

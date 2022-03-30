@@ -35,6 +35,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -339,6 +340,20 @@ public class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", "descr");
         keyValueResolver.reload();
         assertThat((String) keyValueResolver.get("key")).isEqualTo("value");
+    }
+
+    @Test
+    void reloadSingleKeyReplacesThatKey() {
+        keyValueResolver.setPersistence(persistenceMock);
+        final String key1 = "key1";
+        final String key2 = "key2";
+        keyValueResolver.set(key1, "value1", "descr");
+        keyValueResolver.set(key2, "value2", "descr");
+        when(persistenceMock.load(eq(key2), any(DomainSpecificValueFactory.class))).thenReturn(new KeyValues(key2, new DefaultDomainSpecificValueFactory(), "desc",
+                List.of(DomainSpecificValue.withoutChangeSet("newValue"))));
+        keyValueResolver.reload(key2);
+        assertThat((String) keyValueResolver.get(key1)).isEqualTo("value1");
+        assertThat((String) keyValueResolver.get(key2)).isEqualTo("newValue");
     }
 
     @Test

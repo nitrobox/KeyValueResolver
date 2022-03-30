@@ -12,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,5 +132,24 @@ public class ValuesStoreTest {
         assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
+    @Test
+    void reloadASingleKey() {
+        final String key = "key";
+        valuesStore.setWithChangeSet(key, "desc", null, "value", "dom1");
+        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(new KeyValues(key, domainSpecificValueFactory, "desc",
+                List.of(DomainSpecificValue.withoutChangeSet("newValue", "dom1"))));
+        valuesStore.reload(key);
+        assertThat(valuesStore.getValuesFor(key).getDomainSpecificValues()).containsExactlyInAnyOrder(
+                DomainSpecificValue.withoutChangeSet("newValue", "dom1")
+        );
+    }
 
+    @Test
+    void reloadASingleKeyThatIsNoLongerPresentRemovesIt() {
+        final String key = "key";
+        valuesStore.setWithChangeSet(key, "desc", null, "value", "dom1");
+        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(null);
+        valuesStore.reload(key);
+        assertThat(valuesStore.getValuesFor(key)).isNull();
+    }
 }
