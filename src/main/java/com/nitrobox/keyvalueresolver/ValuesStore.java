@@ -144,7 +144,7 @@ public class ValuesStore {
                 if (keyValues != null) {
                     keyValuesMap.put(key, keyValues);
                 } else {
-                    remove(key);
+                    keyValuesMap.remove(key);
                 }
             });
         }
