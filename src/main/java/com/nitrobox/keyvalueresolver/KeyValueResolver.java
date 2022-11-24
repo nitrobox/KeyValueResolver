@@ -62,7 +62,11 @@ public interface KeyValueResolver {
 
     void set(String key, Object value, String description, String... domainValues);
 
+    void set(String key, Object value, String description, DomainResolver resolver);
+
     void setWithChangeSet(String key, Object value, String description, String changeSet, String... domainValues);
+    
+    void setWithChangeSet(String key, Object value, String description, String changeSet, DomainResolver resolver);
 
     void reload();
 
