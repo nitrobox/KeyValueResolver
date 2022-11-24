@@ -178,8 +178,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public void set(final String key, final Object value, final String description, DomainResolver resolver) {
-        String[] domainValues = mapDomainResolverToStringArray(resolver);
+    public void set(final String key, final Object value, final String description, DomainValues valueHolder) {
+        String[] domainValues = valueHolder.getDomainValues(domains);
         this.set(key, value, description, domainValues);
     }
 
@@ -193,18 +193,9 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public void setWithChangeSet(String key, Object value, String description, String changeSet, DomainResolver resolver){
-        String[] domainValues = mapDomainResolverToStringArray(resolver);
+    public void setWithChangeSet(String key, Object value, String description, String changeSet, DomainValues valueHolder){
+        String[] domainValues = valueHolder.getDomainValues(domains);
         this.setWithChangeSet(key, value, description, changeSet, domainValues);
-    }
-
-    private String[] mapDomainResolverToStringArray(DomainResolver resolver) {
-        String[] domainValues = new String[domains.size()];
-        for( int i = 0; i<domains.size();i++){
-            String domain = domains.get(i);
-            domainValues[i] = resolver.getDomainValue(domain);
-        }
-        return domainValues;
     }
 
     public void setPersistence(final Persistence persistence) {

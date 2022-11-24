@@ -1,7 +1,7 @@
 KeyValueResolver
 =======
 
-KeyValueResolver - An advanced key to value mapping tool with advanced hierarchical overwriting of values
+KeyValueResolver - A dynamic key to value mapping tool with advanced hierarchical overwriting of values
 
 This project is a fork from [Roperty](https://github.com/parship/roperty), originally developer by Parship.
 
