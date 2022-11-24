@@ -24,6 +24,7 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
 }
 
 reckon {
@@ -32,6 +33,12 @@ reckon {
 }
 
 apply plugin: "jacoco"
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
 
 reckonTagCreate.dependsOn check
 
