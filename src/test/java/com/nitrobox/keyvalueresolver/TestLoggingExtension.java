@@ -1,5 +1,9 @@
 /*
- * Roperty - An advanced property management and retrival system
+ * KeyValueResolver - An dynamic Key-Value Store
+ * Copyright (C) 2022 Nitrobox GmbH
+ *
+ * This Software is a fork of Roperty - An advanced property 
+ * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author finsterwalder
  * @since 2013-05-24 13:25
  */
-public class TestLoggingExtension implements BeforeEachCallback, AfterEachCallback {
+class TestLoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
     private final Level levelToSet;
     private Level levelToRestore;

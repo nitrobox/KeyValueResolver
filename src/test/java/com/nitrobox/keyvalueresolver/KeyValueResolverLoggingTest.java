@@ -1,5 +1,9 @@
 /*
- * Roperty - An advanced property management and retrival system
+ * KeyValueResolver - An dynamic Key-Value Store
+ * Copyright (C) 2022 Nitrobox GmbH
+ *
+ * This Software is a fork of Roperty - An advanced property 
+ * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @author finsterwalder
  * @since 2013-05-28 11:45
  */
-public class KeyValueResolverLoggingTest {
+class KeyValueResolverLoggingTest {
 
     @RegisterExtension
     private final TestLoggingExtension logExtension = new TestLoggingExtension(Level.DEBUG);
