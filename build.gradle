@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'org.ajoberstar.reckon' version '0.13.2'
-    id "com.github.ben-manes.versions" version "0.42.0"
+    id "com.github.ben-manes.versions" version "0.44.0"
 }
 
 group = 'com.nitrobox'
@@ -10,14 +10,14 @@ description = 'KeyValueResolver'
 java.sourceCompatibility = 11
 
 dependencies {
-    implementation 'org.slf4j:slf4j-api:1.7.36'
-    testImplementation 'org.assertj:assertj-core:3.22.0'
-    testImplementation 'ch.qos.logback:logback-classic:1.2.11'
-    testImplementation 'org.mockito:mockito-core:4.3.1'
-    testImplementation 'org.mockito:mockito-junit-jupiter:4.3.1'
+    implementation 'org.slf4j:slf4j-api:2.0.4'
+    testImplementation 'org.assertj:assertj-core:3.23.1'
+    testImplementation 'ch.qos.logback:logback-classic:1.4.5'
+    testImplementation 'org.mockito:mockito-core:4.9.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.9.0'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
 }
 
 test {

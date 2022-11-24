@@ -2,7 +2,7 @@
  * KeyValueResolver - An dynamic Key-Value Store
  * Copyright (C) 2022 Nitrobox GmbH
  *
- * This Software is a fork of Roperty - An advanced property 
+ * This Software is a fork of Roperty - An advanced property
  * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
@@ -353,8 +353,9 @@ class KeyValueResolverImplTest {
         final String key2 = "key2";
         keyValueResolver.set(key1, "value1", "descr");
         keyValueResolver.set(key2, "value2", "descr");
-        when(persistenceMock.load(eq(key2), any(DomainSpecificValueFactory.class))).thenReturn(new KeyValues(key2, new DefaultDomainSpecificValueFactory(), "desc",
-                List.of(DomainSpecificValue.withoutChangeSet("newValue"))));
+        when(persistenceMock.load(eq(key2), any(DomainSpecificValueFactory.class))).thenReturn(
+                new KeyValues(key2, new DefaultDomainSpecificValueFactory(), "desc",
+                        List.of(DomainSpecificValue.withoutChangeSet("newValue"))));
         keyValueResolver.reload(key2);
         assertThat((String) keyValueResolver.get(key1)).isEqualTo("value1");
         assertThat((String) keyValueResolver.get(key2)).isEqualTo("newValue");
@@ -421,8 +422,10 @@ class KeyValueResolverImplTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         keyValueResolver.dump(new PrintStream(os));
         String output = os.toString("UTF8");
-        assertThat(output)
-                .isEqualTo("KeyValueResolver{domains=[dom1]\nKeyValues for \"key\": KeyValues{\n\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}\n}\n}\n");
+        assertThat(output).contains("KeyValueResolver{domains=[dom1]")
+                .contains("KeyValues for \"key\": KeyValues{")
+                .contains("description=\"descr\"")
+                .contains("DomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}");
     }
 
     @Test
@@ -465,7 +468,7 @@ class KeyValueResolverImplTest {
         assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isEqualTo("value");
         assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue2");
     }
-    
+
     @Test
     void removeLastDomainSpecificValueDoesNotRemoveKeyCompletely() {
         keyValueResolver.addDomains("domain1", "domain2", "domain3");
@@ -494,13 +497,12 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value2Other", "descr", "dom1", "dom2Other", "dom3");
         keyValueResolver.set("key", "value3Other", "descr", "dom1", "dom2", "dom3Other");
         keyValueResolver.set("key", "value4", "descr", "dom1", "other", "dom3", "whatever");
-        keyValueResolver.removeAllMatching("key","dom1", null, "dom3");
+        keyValueResolver.removeAllMatching("key", "dom1", null, "dom3");
         final KeyValues keyValues = keyValueResolver.getKeyValues("key");
         assertThat(keyValues.getDomainSpecificValues()).hasSize(2);
         assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
                 new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
-                new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other")
-        );
+                new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other"));
     }
 
     @Test
@@ -508,10 +510,10 @@ class KeyValueResolverImplTest {
         keyValueResolver.addDomains("domain1", "domain2");
         keyValueResolver.set("key", "value2", "descr", "dom1");
         keyValueResolver.set("key", "value3", "descr", "dom1", "dom2");
-        keyValueResolver.removeAllMatching("key","dom1", null);
+        keyValueResolver.removeAllMatching("key", "dom1", null);
         assertThat(keyValueResolver.getAllKeyValues()).isEmpty();
     }
-    
+
     @Test
     void removeACompleteKey() {
         KeyValueResolverImpl kvrWithPersistence = new KeyValueResolverImpl(persistenceMock);
@@ -582,8 +584,7 @@ class KeyValueResolverImplTest {
         keyValueResolver.addDomains("dom1", "dom2", "dom3");
         final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
                 DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2", "domval3", "domval4"));
-        assertThat(domainValuesMap).hasSize(3)
-                .contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"));
+        assertThat(domainValuesMap).hasSize(3).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"));
     }
 
     @Test
