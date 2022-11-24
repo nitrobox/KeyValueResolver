@@ -32,7 +32,7 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Build and analyze
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           GITHUB_USER: ${{ github.actor }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           ARTIFACTORY_USER: ${{ secrets.ARTIFACTORY_PRODUCTION_USERNAME }}
