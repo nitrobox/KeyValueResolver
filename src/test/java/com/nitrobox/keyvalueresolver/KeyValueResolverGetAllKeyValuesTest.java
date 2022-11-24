@@ -132,6 +132,23 @@ class KeyValueResolverGetAllKeyValuesTest {
     }
 
     @Test
+    void keysInAChangeSetAreNotReturnedWhenTheChangeSetIsNotActiveWithDomainValues() {
+        keyValueResolver.set("key1", "value_dom1", "desc", "domval1");
+        MapBackedDomainValues domainValues = new MapBackedDomainValues().set("dom1","domval1");
+        keyValueResolver.setWithChangeSet("key1", "CS_value", "desc", "ChangeSet", domainValues);
+
+        Collection<KeyValues> allKeyValues = keyValueResolver.getAllKeyValues(new MapBackedDomainResolver().set("dom1", "domval1"));
+        assertThat(allKeyValues).hasSize(1);
+
+        final KeyValues keyValues = allKeyValues.iterator().next();
+        assertThat(keyValues.getKey()).isEqualTo("key1");
+        final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
+        assertThat(domainSpecificValues).containsExactlyInAnyOrder(
+                new DefaultDomainSpecificValueFactory().create("value_dom1", null, "domval1")
+        );
+    }
+
+    @Test
     void theHighestPrecedenceKeysInAChangeSetAreReturnedWhenTheChangeSetIsActive() {
         keyValueResolver.set("key1", "value_dom1", "desc", "domval1");
         keyValueResolver.set("key1", "val", "desc", "domval1", "domval2");
@@ -149,6 +166,31 @@ class KeyValueResolverGetAllKeyValuesTest {
         assertThat(domainSpecificValues).containsExactlyInAnyOrder(
                 new DefaultDomainSpecificValueFactory().create("val", null, "domval1", "domval2"),
                 new DefaultDomainSpecificValueFactory().create("ACS_value", "AChangeSet", "domval1")
+        );
+    }
+
+    @Test
+    void theHighestPrecedenceKeysInAChangeSetAreReturnedWhenTheChangeSetIsActiveWithDomainValues() {
+        MapBackedDomainValues domainValues1 = new MapBackedDomainValues().set("dom1","domval1");
+        keyValueResolver.set("key1", "value_dom1", "desc", domainValues1);
+        MapBackedDomainValues domainValues2 = new MapBackedDomainValues().set("dom1","domval1").set("dom2","domval2");
+        keyValueResolver.set("key1", "val", "desc", domainValues2);
+        MapBackedDomainValues domainValues3 = new MapBackedDomainValues().set("dom1","domval1");
+        keyValueResolver.setWithChangeSet("key1", "CS_value", "desc", "ChangeSet", domainValues3);
+        MapBackedDomainValues domainValues4 = new MapBackedDomainValues().set("dom1","domval1");
+        keyValueResolver.setWithChangeSet("key1", "ACS_value", "desc", "AChangeSet", domainValues4);
+
+        Collection<KeyValues> allKeyValues = keyValueResolver.getAllKeyValues(new MapBackedDomainResolver()
+                .set("dom1", "domval1")
+                .addActiveChangeSets("ChangeSet", "AChangeSet"));
+        assertThat(allKeyValues).hasSize(1);
+
+        final KeyValues keyValues = allKeyValues.iterator().next();
+        assertThat(keyValues.getKey()).isEqualTo("key1");
+        final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
+        assertThat(domainSpecificValues).containsExactlyInAnyOrder(
+                new DefaultDomainSpecificValueFactory().create("val", null, "domval1", "domval2","*","*"),
+                new DefaultDomainSpecificValueFactory().create("ACS_value", "AChangeSet", "domval1","*","*","*")
         );
     }
 
