@@ -31,6 +31,8 @@ reckon {
     snapshotFromProp()
 }
 
+apply plugin: "jacoco"
+
 reckonTagCreate.dependsOn check
 
 repositories {
