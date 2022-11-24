@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-04-02 22:32
  */
-public class KeyValuesTest {
+class KeyValuesTest {
 
     private final KeyValues keyValues = new KeyValues("key", new DefaultDomainSpecificValueFactory(), null);
 
@@ -60,7 +60,7 @@ public class KeyValuesTest {
     @Test
     void descriptionIsNeverNullButIsTheEmptyString() {
         KeyValues keyValues = new KeyValues("key", new DefaultDomainSpecificValueFactory(), null);
-        assertThat(keyValues.getDescription()).isEqualTo("");
+        assertThat(keyValues.getDescription()).isEmpty();
     }
 
     @Test
@@ -73,7 +73,7 @@ public class KeyValuesTest {
     
     @Test
     void toStringEmpty() {
-        assertThat(keyValues.toString()).isEqualTo("KeyValues{\n\tdescription=\"\"\n" +
+        assertThat(keyValues).hasToString("KeyValues{\n\tdescription=\"\"\n" +
                 "}");
     }
 
@@ -81,7 +81,7 @@ public class KeyValuesTest {
     void toStringFilled() {
         keyValues.setDescription("description");
         keyValues.put("text", "domain1", "domain2");
-        assertThat(keyValues.toString()).isEqualTo("KeyValues{\n" +
+        assertThat(keyValues).hasToString("KeyValues{\n" +
                 "\tdescription=\"description\"\n" +
                 "\tDomainSpecificValue{pattern=\"domain1|domain2|\", ordering=7, value=\"text\"}\n" +
                 "}");

@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-09-23 16:45
  */
-public class KeyValueResolverChangeSetTest {
+class KeyValueResolverChangeSetTest {
 
     private final KeyValueResolver keyValueResolver = new KeyValueResolverImpl();
 

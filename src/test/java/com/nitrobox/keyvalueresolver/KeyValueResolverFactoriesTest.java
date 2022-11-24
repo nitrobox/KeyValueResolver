@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-06-07 16:05
  */
-public class KeyValueResolverFactoriesTest {
+class KeyValueResolverFactoriesTest {
 
     final DomainSpecificValueFactory domainSpecificValueFactoryMock = mock(DomainSpecificValueFactory.class);
     final String key = "key";

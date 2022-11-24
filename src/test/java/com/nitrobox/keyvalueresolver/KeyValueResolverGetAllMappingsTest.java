@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class KeyValueResolverGetAllMappingsTest {
+class KeyValueResolverGetAllMappingsTest {
 
     private final KeyValueResolverImpl keyValueResolver = new KeyValueResolverImpl();
     private final MapBackedDomainResolver resolver = new MapBackedDomainResolver();

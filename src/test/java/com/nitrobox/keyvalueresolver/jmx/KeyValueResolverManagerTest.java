@@ -37,9 +37,9 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-06-07 08:49
  */
-public class KeyValueResolverManagerTest {
+class KeyValueResolverManagerTest {
 
-    private KeyValueResolverManager manager = KeyValueResolverManager.getInstance();
+    private final KeyValueResolverManager manager = KeyValueResolverManager.getInstance();
 
     @BeforeEach
     void before() {
@@ -48,7 +48,7 @@ public class KeyValueResolverManagerTest {
 
     @Test
     void keyValueResolverInstancesRegisterThemselvesWithTheManager() {
-        assertThat(manager.dump()).isEqualTo("");
+        assertThat(manager.dump()).isEmpty();
         new KeyValueResolverImpl();
         assertThat(manager.dump()).isEqualTo("KeyValueResolver{domains=[]\n}\n\n");
     }
@@ -59,7 +59,7 @@ public class KeyValueResolverManagerTest {
         assertThat(manager.dump()).isEqualTo("KeyValueResolver{domains=[]\n}\n\n");
         keyValueResolver = null;
         System.gc();
-        assertThat(manager.dump()).isEqualTo("");
+        assertThat(manager.dump()).isEmpty();
     }
 
     @Test
@@ -71,8 +71,8 @@ public class KeyValueResolverManagerTest {
         keyValueResolver2.set(key, "value2", "descr");
         String dump = manager.dump("key");
         assertThat(dump).contains("KeyValues{\n" +
-            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value1\"}\n}");
-        assertThat(dump).contains("KeyValues{\n" +
+            "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value1\"}\n}")
+                .contains("KeyValues{\n" +
             "\tdescription=\"descr\"\n\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value2\"}\n}");
     }
 

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author finsterwalder
  * @since 2013-05-24 13:25
  */
-public class TestLoggingExtension implements BeforeEachCallback, AfterEachCallback {
+class TestLoggingExtension implements BeforeEachCallback, AfterEachCallback {
 
     private final Level levelToSet;
     private Level levelToRestore;

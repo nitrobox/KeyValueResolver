@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Created by Benjamin Jochheim on 10.11.15.
  */
-public class DomainSpecificValueFactoryWithStringInterningTest {
+class DomainSpecificValueFactoryWithStringInterningTest {
 
     private final DomainSpecificValueFactory factory = new DomainSpecificValueFactoryWithStringInterning();
 
@@ -37,7 +37,7 @@ public class DomainSpecificValueFactoryWithStringInterningTest {
         String value = "value";
         DomainSpecificValue dsv = factory.create(value, null);
         assertThat((String) dsv.getValue()).isEqualTo(value);
-        assertThat(dsv.getPattern()).isEqualTo("");
+        assertThat(dsv.getPattern()).isEmpty();
     }
 
     @Test
@@ -65,8 +65,8 @@ public class DomainSpecificValueFactoryWithStringInterningTest {
 
         final String value1 = new String("testString");
         final String value2 = new String("testString");
-        assertThat(value1).isNotSameAs(value2);
-        assertThat(value1).isEqualTo(value2);
+        assertThat(value1).isNotSameAs(value2)
+                .isEqualTo(value2);
 
         DomainSpecificValue dsv1 = factory.create(value1, null, "DE", "de_DE");
         DomainSpecificValue dsv2 = factory.create(value2, null, "DE", "de_DE");

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-05-15 15:26
  */
-public class MapBackedDomainResolverTest {
+class MapBackedDomainResolverTest {
 
     private final MapBackedDomainResolver resolver = new MapBackedDomainResolver().set("dom1", "val1").set("dom2", "val2");
 
@@ -48,7 +48,7 @@ public class MapBackedDomainResolverTest {
 
     @Test
     void toStringTest() {
-        assertThat(resolver.toString()).isEqualTo("com.nitrobox.keyvalueresolver.MapBackedDomainResolver with {dom1=val1, dom2=val2}");
+        assertThat(resolver).hasToString("com.nitrobox.keyvalueresolver.MapBackedDomainResolver with {dom1=val1, dom2=val2}");
     }
 
     @Test
@@ -59,8 +59,8 @@ public class MapBackedDomainResolverTest {
         MapBackedDomainResolver anotherResolver = new MapBackedDomainResolver();
         anotherResolver.set("domain", "value");
 
-        assertThat(aResolver).isEqualTo(anotherResolver);
-        assertThat(aResolver.hashCode()).isEqualTo(anotherResolver.hashCode());
+        assertThat(aResolver).isEqualTo(anotherResolver)
+                .hasSameHashCodeAs(anotherResolver.hashCode());
     }
 
     @Test

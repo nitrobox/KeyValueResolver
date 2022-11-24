@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 /**
  * User: mjaeckel Date: 15.11.13 Time: 10:47
  */
-public class DefaultDomainSpecificValueFactoryTest {
+class DefaultDomainSpecificValueFactoryTest {
 
     private final DomainSpecificValueFactory factory = new DefaultDomainSpecificValueFactory();
 
@@ -38,7 +38,7 @@ public class DefaultDomainSpecificValueFactoryTest {
         String value = "value";
         DomainSpecificValue dsv = factory.create(value, null);
         assertThat((String) dsv.getValue()).isEqualTo(value);
-        assertThat(dsv.getPattern()).isEqualTo("");
+        assertThat(dsv.getPattern()).isEmpty();
     }
 
     @Test

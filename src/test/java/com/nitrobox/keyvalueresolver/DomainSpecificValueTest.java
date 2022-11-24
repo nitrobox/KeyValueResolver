@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
  * @author finsterwalder
  * @since 2013-09-24 11:35
  */
-public class DomainSpecificValueTest {
+class DomainSpecificValueTest {
 
     @Test
     void valuesWithChangeSetAreOrderedBeforeValuesWithoutChangeSet() {

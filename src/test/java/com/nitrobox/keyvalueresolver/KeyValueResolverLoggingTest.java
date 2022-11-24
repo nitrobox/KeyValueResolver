@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * @author finsterwalder
  * @since 2013-05-28 11:45
  */
-public class KeyValueResolverLoggingTest {
+class KeyValueResolverLoggingTest {
 
     @RegisterExtension
     private final TestLoggingExtension logExtension = new TestLoggingExtension(Level.DEBUG);

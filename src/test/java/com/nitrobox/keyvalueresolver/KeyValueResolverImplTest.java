@@ -52,7 +52,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * @since 2013-03-25 08:07
  */
 @ExtendWith(MockitoExtension.class)
-public class KeyValueResolverImplTest {
+class KeyValueResolverImplTest {
 
     @Mock(lenient = true)
     private DomainResolver resolverMock;
@@ -131,7 +131,7 @@ public class KeyValueResolverImplTest {
     @Test
     void settingAnEmptyString() {
         keyValueResolver.set("key", "", null);
-        assertThat((String) keyValueResolver.get("key", resolverMock)).isEqualTo("");
+        assertThat((String) keyValueResolver.get("key", resolverMock)).isEmpty();
     }
 
     @Test
@@ -363,7 +363,7 @@ public class KeyValueResolverImplTest {
     @Test
     void domainsThatAreInitializedArePresent() {
         keyValueResolver = new KeyValueResolverImpl("domain1", "domain2");
-        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[domain1, domain2]\n}");
+        assertThat(keyValueResolver.dump()).hasToString("KeyValueResolver{domains=[domain1, domain2]\n}");
     }
 
     @Test
@@ -384,14 +384,14 @@ public class KeyValueResolverImplTest {
 
     @Test
     void keyValueResolverToString() {
-        assertThat(keyValueResolver.toString()).isEqualTo("KeyValueResolver{domains=[]}");
+        assertThat(keyValueResolver).hasToString("KeyValueResolver{domains=[]}");
     }
 
     @Test
     void toStringEmptyKeyValueResolver() {
-        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[]\n}");
+        assertThat(keyValueResolver.dump()).hasToString("KeyValueResolver{domains=[]\n}");
         keyValueResolver.addDomains("domain");
-        assertThat(keyValueResolver.dump().toString()).isEqualTo("KeyValueResolver{domains=[domain]\n}");
+        assertThat(keyValueResolver.dump()).hasToString("KeyValueResolver{domains=[domain]\n}");
     }
 
     @Test
@@ -573,8 +573,8 @@ public class KeyValueResolverImplTest {
         keyValueResolver.addDomains("dom1", "dom2", "dom3", "dom4");
         final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
                 DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2", "domval3", "domval4"));
-        assertThat(domainValuesMap).hasSize(4);
-        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"), entry("dom4", "domval4"));
+        assertThat(domainValuesMap).hasSize(4)
+                .contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"), entry("dom4", "domval4"));
     }
 
     @Test
@@ -582,8 +582,8 @@ public class KeyValueResolverImplTest {
         keyValueResolver.addDomains("dom1", "dom2", "dom3");
         final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
                 DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2", "domval3", "domval4"));
-        assertThat(domainValuesMap).hasSize(3);
-        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"));
+        assertThat(domainValuesMap).hasSize(3)
+                .contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "domval3"));
     }
 
     @Test
@@ -591,7 +591,7 @@ public class KeyValueResolverImplTest {
         keyValueResolver.addDomains("dom1", "dom2", "dom3", "dom4");
         final Map<String, String> domainValuesMap = keyValueResolver.getDomainValuesMap(
                 DomainSpecificValue.withoutChangeSet("val", "domval1", "domval2"));
-        assertThat(domainValuesMap).hasSize(4);
-        assertThat(domainValuesMap).contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "*"), entry("dom4", "*"));
+        assertThat(domainValuesMap).hasSize(4)
+                .contains(entry("dom1", "domval1"), entry("dom2", "domval2"), entry("dom3", "*"), entry("dom4", "*"));
     }
 }

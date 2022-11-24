@@ -42,15 +42,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ValuesStoreTest {
+class ValuesStoreTest {
 
     @InjectMocks
     private ValuesStore valuesStore = new ValuesStore();
     @Mock
     private Persistence persistence;
 
-    private DomainSpecificValueFactory domainSpecificValueFactory = new DefaultDomainSpecificValueFactory();
-    private KeyValues keyValues = new KeyValues("key", domainSpecificValueFactory);
+    private final DomainSpecificValueFactory domainSpecificValueFactory = new DefaultDomainSpecificValueFactory();
+    private final KeyValues keyValues = new KeyValues("key", domainSpecificValueFactory);
 
     @BeforeEach
     void before() {
@@ -65,7 +65,7 @@ public class ValuesStoreTest {
 
     @Test
     void cannotModifyMapFromOuterClass() {
-        assertThrows(UnsupportedOperationException.class, () -> valuesStore.getAllValues().add(mock(KeyValues.class)));
+        assertThrows(UnsupportedOperationException.class, () -> valuesStore.getAllValues().add(keyValues));
         assertThat(valuesStore.getAllValues()).isEmpty();
     }
 
@@ -123,8 +123,8 @@ public class ValuesStoreTest {
 
         valuesStore.dump(out);
 
-        assertThat(new String(byteArrayOutputStream.toByteArray()))
-                .isEqualTo("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"description\"\n}");
+        assertThat(byteArrayOutputStream.toString()).contains("KeyValues for \"key\": KeyValues")
+                .contains("description=\"description\"");
         assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
@@ -157,12 +157,11 @@ public class ValuesStoreTest {
     void reloadASingleKey() {
         final String key = "key";
         valuesStore.setWithChangeSet(key, "desc", null, "value", "dom1");
-        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(new KeyValues(key, domainSpecificValueFactory, "desc",
-                List.of(DomainSpecificValue.withoutChangeSet("newValue", "dom1"))));
+        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(
+                new KeyValues(key, domainSpecificValueFactory, "desc", List.of(DomainSpecificValue.withoutChangeSet("newValue", "dom1"))));
         valuesStore.reload(key);
         assertThat(valuesStore.getValuesFor(key).getDomainSpecificValues()).containsExactlyInAnyOrder(
-                DomainSpecificValue.withoutChangeSet("newValue", "dom1")
-        );
+                DomainSpecificValue.withoutChangeSet("newValue", "dom1"));
     }
 
     @Test
