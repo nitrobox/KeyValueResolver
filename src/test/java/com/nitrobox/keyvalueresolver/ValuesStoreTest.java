@@ -1,3 +1,24 @@
+/*
+ * KeyValueResolver - An dynamic Key-Value Store
+ * Copyright (C) 2022 Nitrobox GmbH
+ *
+ * This Software is a fork of Roperty - An advanced property
+ * management and retrival system
+ * Copyright (C) 2013 PARSHIP GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.nitrobox.keyvalueresolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,15 +42,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ValuesStoreTest {
+class ValuesStoreTest {
 
     @InjectMocks
     private ValuesStore valuesStore = new ValuesStore();
     @Mock
     private Persistence persistence;
 
-    private DomainSpecificValueFactory domainSpecificValueFactory = new DefaultDomainSpecificValueFactory();
-    private KeyValues keyValues = new KeyValues("key", domainSpecificValueFactory);
+    private final DomainSpecificValueFactory domainSpecificValueFactory = new DefaultDomainSpecificValueFactory();
+    private final KeyValues keyValues = new KeyValues("key", domainSpecificValueFactory);
 
     @BeforeEach
     void before() {
@@ -44,7 +65,7 @@ public class ValuesStoreTest {
 
     @Test
     void cannotModifyMapFromOuterClass() {
-        assertThrows(UnsupportedOperationException.class, () -> valuesStore.getAllValues().add(mock(KeyValues.class)));
+        assertThrows(UnsupportedOperationException.class, () -> valuesStore.getAllValues().add(keyValues));
         assertThat(valuesStore.getAllValues()).isEmpty();
     }
 
@@ -102,8 +123,8 @@ public class ValuesStoreTest {
 
         valuesStore.dump(out);
 
-        assertThat(new String(byteArrayOutputStream.toByteArray()))
-                .isEqualTo("\nKeyValues for \"key\": KeyValues{\n\tdescription=\"description\"\n}");
+        assertThat(byteArrayOutputStream.toString()).contains("KeyValues for \"key\": KeyValues")
+                .contains("description=\"description\"");
         assertThat(valuesStore.getAllValues()).hasSize(1);
     }
 
@@ -136,12 +157,11 @@ public class ValuesStoreTest {
     void reloadASingleKey() {
         final String key = "key";
         valuesStore.setWithChangeSet(key, "desc", null, "value", "dom1");
-        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(new KeyValues(key, domainSpecificValueFactory, "desc",
-                List.of(DomainSpecificValue.withoutChangeSet("newValue", "dom1"))));
+        when(persistence.load(key, domainSpecificValueFactory)).thenReturn(
+                new KeyValues(key, domainSpecificValueFactory, "desc", List.of(DomainSpecificValue.withoutChangeSet("newValue", "dom1"))));
         valuesStore.reload(key);
         assertThat(valuesStore.getValuesFor(key).getDomainSpecificValues()).containsExactlyInAnyOrder(
-                DomainSpecificValue.withoutChangeSet("newValue", "dom1")
-        );
+                DomainSpecificValue.withoutChangeSet("newValue", "dom1"));
     }
 
     @Test

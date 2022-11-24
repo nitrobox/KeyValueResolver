@@ -1,5 +1,9 @@
 /*
- * Roperty - An advanced property management and retrival system
+ * KeyValueResolver - An dynamic Key-Value Store
+ * Copyright (C) 2022 Nitrobox GmbH
+ *
+ * This Software is a fork of Roperty - An advanced property
+ * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +18,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.nitrobox.keyvalueresolver;
 
 import java.util.Collection;

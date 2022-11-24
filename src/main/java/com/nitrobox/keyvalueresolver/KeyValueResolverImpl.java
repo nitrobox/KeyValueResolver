@@ -1,5 +1,9 @@
 /*
- * Roperty - An advanced property management and retrival system
+ * KeyValueResolver - An dynamic Key-Value Store
+ * Copyright (C) 2022 Nitrobox GmbH
+ *
+ * This Software is a fork of Roperty - An advanced property 
+ * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class KeyValueResolverImpl implements KeyValueResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyValueResolverImpl.class);
+    public static final String KEY_VALUE_RESOLVER_DOMAINS_TEXT = "KeyValueResolver{domains=";
     private final ValuesStore valuesStore = new ValuesStore();
     private final List<String> domains = new CopyOnWriteArrayList<>();
 
@@ -220,12 +225,12 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public String toString() {
-        return "KeyValueResolver{domains=" + domains + '}';
+        return KEY_VALUE_RESOLVER_DOMAINS_TEXT + domains + '}';
     }
 
     @Override
     public StringBuilder dump() {
-        StringBuilder builder = new StringBuilder("KeyValueResolver{domains=").append(domains);
+        StringBuilder builder = new StringBuilder(KEY_VALUE_RESOLVER_DOMAINS_TEXT).append(domains);
         builder.append(valuesStore.dump());
         builder.append("\n}");
         return builder;
@@ -233,7 +238,7 @@ public class KeyValueResolverImpl implements KeyValueResolver {
 
     @Override
     public void dump(final PrintStream out) {
-        out.print("KeyValueResolver{domains=");
+        out.print(KEY_VALUE_RESOLVER_DOMAINS_TEXT);
         out.print(domains);
         valuesStore.dump(out);
         out.println("\n}");
