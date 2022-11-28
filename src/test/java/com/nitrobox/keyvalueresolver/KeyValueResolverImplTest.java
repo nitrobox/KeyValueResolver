@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -401,17 +402,33 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", null);
         keyValueResolver.set("key", "value2", null, "domain1");
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
-        assertThat(keyValueResolver.dump().toString()).contains("");
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
+                .contains("KeyValues for \"otherKey\": KeyValues{\n")
+                .contains("\tdescription=\"\"\n")
+                .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"")
+                .contains("KeyValues for \"key\": KeyValues{\n")
+                .contains("\tdescription=\"\"\n")
+                .contains("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\"")
+                .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
 
-        assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n");
-        assertThat(keyValueResolver.dump().toString()).contains("KeyValues for \"otherKey\": KeyValues{\n");
-        assertThat(keyValueResolver.dump().toString()).contains("\tdescription=\"\"\n");
-        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"");
+    }
 
-        assertThat(keyValueResolver.dump().toString()).contains("KeyValues for \"key\": KeyValues{\n");
-        assertThat(keyValueResolver.dump().toString()).contains("\tdescription=\"\"\n");
-        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\"");
-        assertThat(keyValueResolver.dump().toString()).contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
+    @Test
+    void toStringFilledKeyValueResolverWithDomainValues() {
+        keyValueResolver.addDomains("domain1", "domain2");
+        keyValueResolver.set("key", "value", null);
+        MapBackedDomainValues domainValues = new MapBackedDomainValues().set("domain1","domain1");
+        keyValueResolver.set("key", "value2", null, domainValues);
+        keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
+
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
+                .contains("KeyValues for \"otherKey\": KeyValues{\n")
+                .contains("\tdescription=\"\"\n")
+                .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"")
+                .contains("KeyValues for \"key\": KeyValues{\n")
+                .contains("\tdescription=\"\"\n")
+                .contains("\tDomainSpecificValue{pattern=\"domain1|*|\", ordering=3, value=\"value2\"")
+                .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
 
     }
 
@@ -421,7 +438,7 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", "descr");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         keyValueResolver.dump(new PrintStream(os));
-        String output = os.toString("UTF8");
+        String output = os.toString(StandardCharsets.UTF_8);
         assertThat(output).contains("KeyValueResolver{domains=[dom1]")
                 .contains("KeyValues for \"key\": KeyValues{")
                 .contains("description=\"descr\"")
@@ -499,8 +516,8 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value4", "descr", "dom1", "other", "dom3", "whatever");
         keyValueResolver.removeAllMatching("key", "dom1", null, "dom3");
         final KeyValues keyValues = keyValueResolver.getKeyValues("key");
-        assertThat(keyValues.getDomainSpecificValues()).hasSize(2);
-        assertThat(keyValues.getDomainSpecificValues()).containsExactlyInAnyOrder(
+        assertThat(keyValues.getDomainSpecificValues()).hasSize(2)
+                .containsExactlyInAnyOrder(
                 new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
                 new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other"));
     }
@@ -553,7 +570,7 @@ class KeyValueResolverImplTest {
         kvrWithPersistence.removeChangeSet("changeSet");
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("valueChangeSet", "changeSet"));
         assertThat((String) kvrWithPersistence.get("key", resolver)).isEqualTo("value");
-        assertThat((String) kvrWithPersistence.<String>get("otherKey", resolver)).isNull();
+        assertThat((String) kvrWithPersistence.get("otherKey", resolver)).isNull();
     }
 
     @Test
