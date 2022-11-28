@@ -290,11 +290,23 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     @Override
     public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
         valuesStore.removeWithChangeSet(trimKey(key), changeSet, domainValues);
+    }    
+    
+    @Override
+    public void removeWithChangeSet(final String key, final String changeSet, DomainValues domainValues) {
+        String[] domainValuesArray = domainValues.getDomainValues(domains);
+        valuesStore.removeWithChangeSet(trimKey(key), changeSet, domainValuesArray);
     }
 
     @Override
     public void remove(final String key, final String... domainValues) {
         removeWithChangeSet(key, null, domainValues);
+    }    
+    
+    @Override
+    public void remove(final String key, DomainValues domainValues) {
+        String[] domainValuesArray = domainValues.getDomainValues(domains);
+        removeWithChangeSet(key, null, domainValuesArray);
     }
 
     @Override
@@ -302,6 +314,13 @@ public class KeyValueResolverImpl implements KeyValueResolver {
         final String trimmedKey = trimKey(key);
         valuesStore.removeAllMatching(trimmedKey, domains, domainValues);
     }
+
+    @Override
+    public void removeAllMatching(final String key, DomainValues domainValues) {
+        String[] domainValuesArray = domainValues.getDomainValues(domains);
+        valuesStore.removeAllMatching(key, domains, domainValuesArray);
+    }
+
 
     @Override
     public void removeKey(final String key) {

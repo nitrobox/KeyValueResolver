@@ -3,7 +3,7 @@ package com.nitrobox.keyvalueresolver;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -15,12 +15,13 @@ public class MapBackedDomainValues implements DomainValues{
 
     @Override
     public String[] getDomainValues(List<String> domains) {
-        String[] domainValues = new String[domains.size()];
+        String[] domainValues = new String[Math.min(domains.size(), map.size())];
         IntStream.range(0,domains.size())
                 .boxed()
                 .map(index -> Pair.of(index, domains.get(index)))
                 .map(pair -> Pair.of(pair.getKey(),map.get(pair.getValue())))
-                .forEach(pair -> domainValues[pair.getKey()]= Optional.ofNullable(pair.getValue()).orElse("*"));
+                .filter(pair -> Objects.nonNull(pair.getValue()))
+                .forEach(pair -> domainValues[pair.getKey()]= pair.getValue());
         return domainValues;
     }
 

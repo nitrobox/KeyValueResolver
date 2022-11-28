@@ -403,11 +403,9 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value2", null, "domain1");
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
         assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
-                .contains("KeyValues for \"otherKey\": KeyValues{\n")
-                .contains("\tdescription=\"\"\n")
+                .contains("KeyValues for \"otherKey\": KeyValues{\n").contains("\tdescription=\"\"\n")
                 .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"")
-                .contains("KeyValues for \"key\": KeyValues{\n")
-                .contains("\tdescription=\"\"\n")
+                .contains("KeyValues for \"key\": KeyValues{\n").contains("\tdescription=\"\"\n")
                 .contains("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\"")
                 .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
 
@@ -417,17 +415,15 @@ class KeyValueResolverImplTest {
     void toStringFilledKeyValueResolverWithDomainValues() {
         keyValueResolver.addDomains("domain1", "domain2");
         keyValueResolver.set("key", "value", null);
-        MapBackedDomainValues domainValues = new MapBackedDomainValues().set("domain1","domain1");
+        MapBackedDomainValues domainValues = new MapBackedDomainValues().set("domain1", "domain1");
         keyValueResolver.set("key", "value2", null, domainValues);
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
 
         assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
-                .contains("KeyValues for \"otherKey\": KeyValues{\n")
-                .contains("\tdescription=\"\"\n")
+                .contains("KeyValues for \"otherKey\": KeyValues{\n").contains("\tdescription=\"\"\n")
                 .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"")
-                .contains("KeyValues for \"key\": KeyValues{\n")
-                .contains("\tdescription=\"\"\n")
-                .contains("\tDomainSpecificValue{pattern=\"domain1|*|\", ordering=3, value=\"value2\"")
+                .contains("KeyValues for \"key\": KeyValues{\n").contains("\tdescription=\"\"\n")
+                .contains("\tDomainSpecificValue{pattern=\"domain1|\", ordering=3, value=\"value2\"")
                 .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"");
 
     }
@@ -439,10 +435,8 @@ class KeyValueResolverImplTest {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         keyValueResolver.dump(new PrintStream(os));
         String output = os.toString(StandardCharsets.UTF_8);
-        assertThat(output).contains("KeyValueResolver{domains=[dom1]")
-                .contains("KeyValues for \"key\": KeyValues{")
-                .contains("description=\"descr\"")
-                .contains("DomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}");
+        assertThat(output).contains("KeyValueResolver{domains=[dom1]").contains("KeyValues for \"key\": KeyValues{")
+                .contains("description=\"descr\"").contains("DomainSpecificValue{pattern=\"\", ordering=1, value=\"value\"}");
     }
 
     @Test
@@ -487,6 +481,24 @@ class KeyValueResolverImplTest {
     }
 
     @Test
+    void removeDomainSpecificValueWithDomainValue() {
+        KeyValueResolverImpl kvrWithPersistence = new KeyValueResolverImpl(persistenceMock);
+        kvrWithPersistence.addDomains("dom1", "dom2");
+        kvrWithPersistence.set("key", "value", "desc");
+        kvrWithPersistence.set("key", "domValue1", "desc", "dom1");
+        kvrWithPersistence.set("key", "domValue2", "desc", "dom1", "dom2");
+
+        DomainValues domainValues = new MapBackedDomainValues().set("dom1", "dom1");
+
+        kvrWithPersistence.remove("key", domainValues);
+
+        verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("domValue1", null, "dom1"));
+        assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isEqualTo("value");
+        assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue2");
+    }
+
+
+    @Test
     void removeLastDomainSpecificValueDoesNotRemoveKeyCompletely() {
         keyValueResolver.addDomains("domain1", "domain2", "domain3");
         keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
@@ -517,9 +529,25 @@ class KeyValueResolverImplTest {
         keyValueResolver.removeAllMatching("key", "dom1", null, "dom3");
         final KeyValues keyValues = keyValueResolver.getKeyValues("key");
         assertThat(keyValues.getDomainSpecificValues()).hasSize(2)
-                .containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
-                new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other"));
+                .containsExactlyInAnyOrder(new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
+                        new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other"));
+    }
+
+    @Test
+    void removeAllMatchingWithDomainValues() {
+        keyValueResolver.addDomains("domain1", "domain2", "domain3", "domain4");
+        keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
+        keyValueResolver.set("key", "value3", "descr", "dom1", "dom2", "dom3");
+        keyValueResolver.set("key", "value2Other", "descr", "dom1", "dom2Other", "dom3");
+        keyValueResolver.set("key", "value3Other", "descr", "dom1", "dom2", "dom3Other");
+        keyValueResolver.set("key", "value4", "descr", "dom1", "other", "dom3", "whatever");
+
+        DomainValues domainValues = new MapBackedDomainValues().set("domain1", "dom1").set("domain2", null).set("domain3", "dom3");
+        keyValueResolver.removeAllMatching("key", domainValues);
+        final KeyValues keyValues = keyValueResolver.getKeyValues("key");
+        assertThat(keyValues.getDomainSpecificValues()).hasSize(2)
+                .containsExactlyInAnyOrder(new DefaultDomainSpecificValueFactory().create("value2", null, "dom1", "dom2"),
+                        new DefaultDomainSpecificValueFactory().create("value3Other", null, "dom1", "dom2", "dom3Other"));
     }
 
     @Test

@@ -126,6 +126,7 @@ public interface KeyValueResolver {
      * @param domainValues the domainValues for the key to remove
      */
     void removeWithChangeSet(String key, String changeSet, String... domainValues);
+    void removeWithChangeSet(String key, String changeSet, DomainValues domainValues);
 
     /**
      * Remove a single domain specific value with exactly the provided domainValues.
@@ -134,6 +135,7 @@ public interface KeyValueResolver {
      * @param domainValues the domainValues for the key to remove
      */
     void remove(String key, String... domainValues);
+    void remove(String key, DomainValues domainValues);
 
     /**
      * Removes all domain specific values that match the given domains.
@@ -142,6 +144,8 @@ public interface KeyValueResolver {
      * @param domainValues the domain patterns for which domain specific values shall be removed. May be partial and can contain wildcards.
      */
     void removeAllMatching(String key, String... domainValues);
+
+    void removeAllMatching(String key, DomainValues domainValues);
 
     /**
      * removes a complete key with all domain specific values.

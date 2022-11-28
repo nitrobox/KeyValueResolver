@@ -189,8 +189,8 @@ class KeyValueResolverGetAllKeyValuesTest {
         assertThat(keyValues.getKey()).isEqualTo("key1");
         final Set<DomainSpecificValue> domainSpecificValues = keyValues.getDomainSpecificValues();
         assertThat(domainSpecificValues).containsExactlyInAnyOrder(
-                new DefaultDomainSpecificValueFactory().create("val", null, "domval1", "domval2","*","*"),
-                new DefaultDomainSpecificValueFactory().create("ACS_value", "AChangeSet", "domval1","*","*","*")
+                new DefaultDomainSpecificValueFactory().create("val", null, "domval1", "domval2"),
+                new DefaultDomainSpecificValueFactory().create("ACS_value", "AChangeSet", "domval1")
         );
     }
 
