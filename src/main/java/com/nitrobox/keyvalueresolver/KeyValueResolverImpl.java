@@ -2,7 +2,7 @@
  * KeyValueResolver - An dynamic Key-Value Store
  * Copyright (C) 2022 Nitrobox GmbH
  *
- * This Software is a fork of Roperty - An advanced property 
+ * This Software is a fork of Roperty - An advanced property
  * management and retrival system
  * Copyright (C) 2013 PARSHIP GmbH
  *
@@ -171,31 +171,33 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     }
 
     @Override
-    public void set(final String key, final Object value, final String description, final String... domainValues) {
+    public DomainSpecificValue set(final String key, final Object value, final String description, final String... domainValues) {
         final String trimmedKey = trimKey(key);
         LOGGER.debug("Storing value: '{}' for key: '{}' with given domains: '{}'.", value, trimmedKey, domainValues);
         valuesStore.setWithChangeSet(trimmedKey, description, null, value, domainValues);
+        return DomainSpecificValue.withoutChangeSet(value, domainValues);
     }
 
     @Override
-    public void set(final String key, final Object value, final String description, DomainValues domainValues) {
+    public DomainSpecificValue set(final String key, final Object value, final String description, DomainValues domainValues) {
         String[] domainValuesArray = domainValues.getDomainValues(domains);
-        this.set(key, value, description, domainValuesArray);
+        return this.set(key, value, description, domainValuesArray);
     }
 
     @Override
-    public void setWithChangeSet(final String key, final Object value, final String description, String changeSet,
+    public DomainSpecificValue setWithChangeSet(final String key, final Object value, final String description, String changeSet,
             final String... domainValues) {
         final String trimmedKey = trimKey(key);
         LOGGER.debug("Storing value: '{}' for key: '{}' for change set: '{}' with given domains: '{}'.", value, trimmedKey, changeSet,
                 domainValues);
         valuesStore.setWithChangeSet(trimmedKey, description, changeSet, value, domainValues);
+        return DomainSpecificValue.withChangeSet(value, changeSet, domainValues);
     }
 
     @Override
-    public void setWithChangeSet(String key, Object value, String description, String changeSet, DomainValues domainValues){
+    public DomainSpecificValue setWithChangeSet(String key, Object value, String description, String changeSet, DomainValues domainValues) {
         String[] domainValuesArray = domainValues.getDomainValues(domains);
-        this.setWithChangeSet(key, value, description, changeSet, domainValuesArray);
+        return this.setWithChangeSet(key, value, description, changeSet, domainValuesArray);
     }
 
     public void setPersistence(final Persistence persistence) {
@@ -290,8 +292,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     @Override
     public void removeWithChangeSet(final String key, final String changeSet, final String... domainValues) {
         valuesStore.removeWithChangeSet(trimKey(key), changeSet, domainValues);
-    }    
-    
+    }
+
     @Override
     public void removeWithChangeSet(final String key, final String changeSet, DomainValues domainValues) {
         String[] domainValuesArray = domainValues.getDomainValues(domains);
@@ -301,8 +303,8 @@ public class KeyValueResolverImpl implements KeyValueResolver {
     @Override
     public void remove(final String key, final String... domainValues) {
         removeWithChangeSet(key, null, domainValues);
-    }    
-    
+    }
+
     @Override
     public void remove(final String key, DomainValues domainValues) {
         String[] domainValuesArray = domainValues.getDomainValues(domains);

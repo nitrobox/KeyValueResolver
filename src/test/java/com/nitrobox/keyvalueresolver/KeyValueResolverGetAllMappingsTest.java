@@ -57,7 +57,7 @@ class KeyValueResolverGetAllMappingsTest {
     @Test
     void onlyTheBestMatchingValueIsUsedWithDomainValues() {
         keyValueResolver.addDomains("domain1", "domain2");
-        keyValueResolver.set("key", "value", "desc");
+        DomainSpecificValue domainSpecificValue = keyValueResolver.set("key", "value", "desc");
         MapBackedDomainValues domainValues1 = new MapBackedDomainValues().set("domain1","*").set("domain2","dom2");
         keyValueResolver.set("key", "value1", "desc", domainValues1);
         MapBackedDomainValues domainValue2 = new MapBackedDomainValues().set("domain2","dom2").set("domain1","dom1");
@@ -65,6 +65,8 @@ class KeyValueResolverGetAllMappingsTest {
         resolver.set("domain1", "dom1").set("domain2", "dom2");
         assertThat(keyValueResolver.getAllMappings(resolver)).hasSize(1)
                 .containsAllEntriesOf(Map.of("key", "value2"));
+        assertThat(domainSpecificValue).isEqualTo(DomainSpecificValue.withoutChangeSet("value"));
+        
     }
 
     @Test

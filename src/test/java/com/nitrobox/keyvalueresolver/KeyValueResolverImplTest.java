@@ -579,11 +579,12 @@ class KeyValueResolverImplTest {
     @Test
     void removeKeyFromChangeSet() {
         keyValueResolver.set("key", "value", "descr");
-        keyValueResolver.setWithChangeSet("key", "valueChangeSet", "descr", "changeSet");
+        DomainSpecificValue domainSpecificValue = keyValueResolver.setWithChangeSet("key", "valueChangeSet", "descr", "changeSet");
         DomainResolver resolver = new MapBackedDomainResolver().addActiveChangeSets("changeSet");
         assertThat((String) keyValueResolver.get("key", resolver)).isEqualTo("valueChangeSet");
         keyValueResolver.removeWithChangeSet("key", "changeSet");
         assertThat((String) keyValueResolver.get("key", resolver)).isEqualTo("value");
+        assertThat(domainSpecificValue).isEqualTo(DomainSpecificValue.withChangeSet("valueChangeSet","changeSet"));
     }
 
     @Test
