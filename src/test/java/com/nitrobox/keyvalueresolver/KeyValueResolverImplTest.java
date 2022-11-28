@@ -194,7 +194,7 @@ class KeyValueResolverImplTest {
         String text = "value";
         keyValueResolver.set("key", text, null);
         assertThrows(ClassCastException.class, () -> {
-            Integer value = keyValueResolver.get("key", resolverMock);
+            keyValueResolver.get("key", resolverMock);
         });
     }
 
@@ -402,8 +402,7 @@ class KeyValueResolverImplTest {
         keyValueResolver.set("key", "value", null);
         keyValueResolver.set("key", "value2", null, "domain1");
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
-        assertThat(keyValueResolver.dump().toString()).contains("")
-                .contains("KeyValueResolver{domains=[domain1, domain2]\n")
+        assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
                 .contains("KeyValues for \"otherKey\": KeyValues{\n")
                 .contains("\tdescription=\"\"\n")
                 .contains("\tDomainSpecificValue{pattern=\"\", ordering=1, value=\"otherValue\"")
@@ -421,7 +420,6 @@ class KeyValueResolverImplTest {
         MapBackedDomainValues domainValues = new MapBackedDomainValues().set("domain1","domain1");
         keyValueResolver.set("key", "value2", null, domainValues);
         keyValueResolver.set(" otherKey ", "otherValue", null); // keys are always trimmed
-        assertThat(keyValueResolver.dump().toString()).contains("");
 
         assertThat(keyValueResolver.dump().toString()).contains("KeyValueResolver{domains=[domain1, domain2]\n")
                 .contains("KeyValues for \"otherKey\": KeyValues{\n")
