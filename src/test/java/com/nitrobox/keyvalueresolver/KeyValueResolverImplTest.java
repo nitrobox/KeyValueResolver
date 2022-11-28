@@ -194,7 +194,7 @@ class KeyValueResolverImplTest {
         String text = "value";
         keyValueResolver.set("key", text, null);
         assertThrows(ClassCastException.class, () -> {
-            keyValueResolver.get("key", resolverMock);
+            Integer value = keyValueResolver.get("key", resolverMock);
         });
     }
 
