@@ -18,7 +18,7 @@ public class MapBackedDomainValues implements DomainValues{
         String[] domainValues = new String[domains.size()];
         IntStream.range(0,domains.size())
                 .boxed()
-                .map(count -> Pair.of(count, domains.get(count)))
+                .map(index -> Pair.of(index, domains.get(index)))
                 .map(pair -> Pair.of(pair.getKey(),map.get(pair.getValue())))
                 .forEach(pair -> domainValues[pair.getKey()]= Optional.ofNullable(pair.getValue()).orElse("*"));
         return domainValues;
