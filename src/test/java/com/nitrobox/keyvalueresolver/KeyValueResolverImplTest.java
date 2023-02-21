@@ -478,6 +478,12 @@ class KeyValueResolverImplTest {
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("domValue1", null, "dom1"));
         assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isEqualTo("value");
         assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue2");
+
+        kvrWithPersistence.remove("key", "dom1", "dom2");
+        verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("domValue2", null, "dom1", "dom2"));
+        kvrWithPersistence.remove("key");
+        verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("value", null));
+        verify(persistenceMock).remove("key");
     }
 
     @Test
@@ -495,20 +501,6 @@ class KeyValueResolverImplTest {
         verify(persistenceMock).remove("key", new DefaultDomainSpecificValueFactory().create("domValue1", null, "dom1"));
         assertThat((String) kvrWithPersistence.get("key", mock(DomainResolver.class))).isEqualTo("value");
         assertThat((String) kvrWithPersistence.get("key", resolverMock)).isEqualTo("domValue2");
-    }
-
-
-    @Test
-    void removeLastDomainSpecificValueDoesNotRemoveKeyCompletely() {
-        keyValueResolver.addDomains("domain1", "domain2", "domain3");
-        keyValueResolver.set("key", "value2", "descr", "dom1", "dom2");
-        keyValueResolver.set("key", "value3", "descr", "dom1", "dom2", "dom3");
-        keyValueResolver.remove("key", "dom1", "dom2");
-        keyValueResolver.remove("key", "dom1", "dom2", "dom3");
-        assertThat(keyValueResolver.getAllKeyValues()).hasSize(1);
-        final KeyValues keyValues = keyValueResolver.getAllKeyValues().iterator().next();
-        assertThat(keyValues.getDomainSpecificValues()).isEmpty();
-        assertThat(keyValues.getKey()).isEqualTo("key");
     }
 
     @Test
