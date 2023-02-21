@@ -176,6 +176,9 @@ public class ValuesStore {
             KeyValues keyValues = getKeyValuesFromMapOrPersistence(key);
             if (keyValues != null) {
                 removeFromPersistence(key, keyValues.remove(changeSet, domainValues));
+                if (keyValues.isEmpty()) {
+                    remove(key);
+                }
             }
         });
     }
