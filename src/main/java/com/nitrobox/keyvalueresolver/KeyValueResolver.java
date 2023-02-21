@@ -140,6 +140,10 @@ public interface KeyValueResolver {
     /**
      * Removes all domain specific values that match the given domains.
      * The key is also removed, when no domain specific values are left after this removal.
+     * <p> 
+     * <strong>NOTE:</strong> This will remove the values that would have been returned for
+     * the query meaning that when `a|*` and `a|b` exist `removeAllMatching(key, "*|b")` will remove `a|b`. Calling it again, will remove
+     * `a|*` as that is the one matched.
      * @param key key for which to remove the domain specific values
      * @param domainValues the domain patterns for which domain specific values shall be removed. May be partial and can contain wildcards.
      */
